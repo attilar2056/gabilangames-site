@@ -15,6 +15,15 @@
 <section class="section soft" id="precos"><div class="container"><div class="heading"><span class="tag">Comece gratuitamente</span><h2>Teste por 24 horas. <span class="grad">Compre só se gostar.</span></h2><p>Licença completa com pagamento único, sem assinatura.</p></div><div class="grid prices"><article class="card"><div class="num">VERSÃO DE TESTE</div><h3>Avaliação de 24 horas</h3><div class="price">Grátis</div><p>Experimente no seu dispositivo compatível antes de adquirir a licença.</p><div class="actions"><a class="btn" href="#download" data-trial-download="1">Baixar versão de teste</a></div></article><article class="card"><div class="num">LICENÇA COMPLETA</div><h3>Pagamento único</h3><div class="price">R$ 9,99 <small>via Pix</small></div><div class="price">US$ 2,99 <small>via PayPal</small></div><p>Para comprar, entre em contato pelos canais oficiais do Gabilan Games e receba sua chave individual.</p><div class="actions"><a class="btn alt" href="https://www.youtube.com/@gabilangames" target="_blank" rel="noopener noreferrer">Canal Gabilan Games ↗</a></div></article></div><div class="banner"><div><h2>Pronto para experimentar?</h2><p>Instale, confira seu dispositivo e decida depois das 24 horas de avaliação.</p></div><a class="btn" href="#download" data-trial-download="1">↓ Baixar versão de teste</a></div></div></section></main>
 <footer class="foot"><div class="container foot-inner"><span>© 2026 Gabilan Games · Integração desenvolvida de forma independente.</span><span>Stream Deck, StreamDock e demais marcas pertencem aos respectivos titulares. Sem afiliação ou endosso oficial. · <a href="https://www.youtube.com/@gabilangames" target="_blank" rel="noopener noreferrer">YouTube Gabilan Games</a></span></div></footer>
 <script>document.getElementById('copy').addEventListener('click',async function(){let v=document.getElementById('path').textContent;try{await navigator.clipboard.writeText(v);this.textContent='Copiado!';setTimeout(()=>this.textContent='Copiar caminho',1800)}catch(e){this.textContent='Selecione e copie o caminho'}});</script>
+<style>
+/* Feedback discreto enquanto a verificacao e o download estao em andamento. */
+a[data-trial-download].trial-busy {
+  opacity: .48 !important;
+  filter: saturate(.35) !important;
+  cursor: wait !important;
+  transition: opacity .15s ease, filter .15s ease;
+}
+</style>
 <!-- Turnstile em modo discreto: desafios interativos podem aparecer quando exigidos pela Cloudflare. -->
 <div id="trial-widget" class="trial-invisible-widget" aria-label="Verificação de segurança"></div>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
@@ -28,6 +37,24 @@
   let inProgress=false;
   let awaitingToken=false;
   let attempt=0;
+  let timeoutId=null;
+  let pendingRequest=null;
+  const downloadLinks=Array.from(document.querySelectorAll('[data-trial-download]'));
+
+  function setBusy(busy){
+    for(const link of downloadLinks){
+      link.classList.toggle('trial-busy',busy);
+      if(busy) link.setAttribute('aria-disabled','true');
+      else link.removeAttribute('aria-disabled');
+    }
+  }
+  function expireAttempt(run){
+    if(!inProgress||run!==attempt)return;
+    attempt++; // invalida callbacks tardios do Turnstile e respostas HTTP
+    if(pendingRequest) pendingRequest.abort();
+    finish();
+    alert('O download demorou mais de 10 segundos. Tente novamente.');
+  }
 
   function clearWidget(){
     if(widgetId!==null&&window.turnstile){
@@ -37,16 +64,22 @@
     widgetContainer.replaceChildren();
   }
   function finish(){
+    clearTimeout(timeoutId);
+    timeoutId=null;
+    pendingRequest=null;
     inProgress=false;
     awaitingToken=false;
+    setBusy(false);
     clearWidget();
   }
   async function download(token, run){
     if(!inProgress||run!==attempt||!token)return;
     awaitingToken=false;
+    const controller=new AbortController();
+    pendingRequest=controller;
     try{
       const response=await fetch(DOWNLOAD_ENDPOINT,{
-        method:'POST',credentials:'include',
+        method:'POST',credentials:'include',signal:controller.signal,
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({turnstileToken:token})
       });
@@ -109,7 +142,9 @@
     }
     inProgress=true;
     awaitingToken=true;
+    setBusy(true);
     const run=++attempt;
+    timeoutId=setTimeout(()=>expireAttempt(run),10000);
     startChallenge(run);
   }
   document.querySelectorAll('[data-trial-download]').forEach(el=>el.addEventListener('click',open));
