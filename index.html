@@ -16,52 +16,120 @@
 <footer class="foot"><div class="container foot-inner"><span>© 2026 Gabilan Games · Integração desenvolvida de forma independente.</span><span>Stream Deck, StreamDock e demais marcas pertencem aos respectivos titulares. Sem afiliação ou endosso oficial. · <a href="https://www.youtube.com/@gabilangames" target="_blank" rel="noopener noreferrer">YouTube Gabilan Games</a></span></div></footer>
 <script>document.getElementById('copy').addEventListener('click',async function(){let v=document.getElementById('path').textContent;try{await navigator.clipboard.writeText(v);this.textContent='Copiado!';setTimeout(()=>this.textContent='Copiar caminho',1800)}catch(e){this.textContent='Selecione e copie o caminho'}});</script>
 <div id="trial-overlay" class="trial-overlay" hidden role="dialog" aria-modal="true" aria-labelledby="trial-title"><div class="trial-panel">
-<h2 id="trial-title">Baixar versão de teste</h2><p>Verifique que você é uma pessoa para gerar ou recuperar sua licença individual. As 24 horas começam na primeira ativação.</p>
-<div id="trial-widget" class="trial-widget"></div><div class="trial-buttons"><button class="trial-primary" id="trial-submit" disabled>Baixar ZIP</button><button class="trial-close" id="trial-close">Cancelar</button></div><p id="trial-status" class="trial-status" role="status"></p></div></div>
+<h2 id="trial-title">Baixar versão de teste</h2>
+<p>Verificando sua solicitação. O download começará automaticamente após a verificação. As 24 horas começam na primeira ativação.</p>
+<div id="trial-widget" class="trial-widget"></div>
+<div class="trial-buttons"><button class="trial-close" id="trial-close" type="button">Cancelar</button></div>
+<p id="trial-status" class="trial-status" role="status" aria-live="polite"></p></div></div>
 <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit" async defer></script>
 <script>
 (function(){
-  // ATENCAO: SUBSTITUA pela Site Key PUBLICA do seu widget Gabilan Games Download.
+  // Insira aqui a Site Key PUBLICA atual; nao coloque o TURNSTILE_SECRET no HTML.
   const TURNSTILE_SITE_KEY='0x4AAAAAAFYzzLMpXadLhM5R';
   const DOWNLOAD_ENDPOINT='https://download.gabilangames.com.br/download';
   const overlay=document.getElementById('trial-overlay');
-  const submit=document.getElementById('trial-submit');
   const status=document.getElementById('trial-status');
-  let widgetId=null,token='';
+  const widgetContainer=document.getElementById('trial-widget');
+  let widgetId=null;
+  let downloading=false;
+  let active=false;
+  let sequence=0;
   function showStatus(message){status.textContent=message;}
-  function renderWidget(){
-    if(TURNSTILE_SITE_KEY.startsWith('COLE_')) {showStatus('O administrador ainda precisa configurar a Site Key do Turnstile.');return;}
-    if(!window.turnstile) {setTimeout(()=>{if(!overlay.hidden)renderWidget()},250);return;}
-    if(widgetId!==null)return;
-    widgetId=turnstile.render('#trial-widget',{
-      sitekey:TURNSTILE_SITE_KEY,action:'trial_download',
-      callback:function(value){token=value;submit.disabled=false;showStatus('Verificação concluída.');},
-      'expired-callback':function(){token='';submit.disabled=true;showStatus('Verificação expirada. Tente novamente.');},
-      'error-callback':function(){token='';submit.disabled=true;showStatus('Falha na verificação. Recarregue a página.');}
-    });
+  function resetWidget(){
+    if(widgetId!==null&&window.turnstile){
+      try{window.turnstile.remove(widgetId);}catch(e){}
+    }
+    widgetId=null;
+    widgetContainer.innerHTML='';
   }
-  function open(event){event.preventDefault();overlay.hidden=false;showStatus('');renderWidget();}
-  document.querySelectorAll('[data-trial-download]').forEach(el=>el.addEventListener('click',open));
-  document.getElementById('trial-close').addEventListener('click',()=>{overlay.hidden=true;});
-  overlay.addEventListener('click',e=>{if(e.target===overlay)overlay.hidden=true;});
-  submit.addEventListener('click',async()=>{
-    if(!token)return;
-    submit.disabled=true;showStatus('Preparando seu download...');
+  function close(){
+    active=false;
+    sequence++;
+    overlay.hidden=true;
+    // Nao reiniciar Turnstile apos o sucesso: preparar nova instancia so quando abrir outra vez.
+    if(!downloading)resetWidget();
+  }
+  async function download(token,currentSequence){
+    if(!active||downloading||!token||currentSequence!==sequence)return;
+    downloading=true;
+    showStatus('Preparando seu ZIP. Aguarde...');
     try{
       const response=await fetch(DOWNLOAD_ENDPOINT,{
         method:'POST',credentials:'include',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({turnstileToken:token})
       });
-      if(!response.ok){let message='Não foi possível preparar o download.';try{const data=await response.json();if(data.error==='limite_temporario_de_novas_licencas')message='Muitas tentativas nesta rede. Tente novamente em uma hora.';else if(data.error==='verificacao_turnstile_invalida')message='Verificação inválida. Faça outra verificação.';}catch{}throw new Error(message);}
-      const data=await response.blob();
-      const localUrl=URL.createObjectURL(data);
-      const a=document.createElement('a');a.href=localUrl;a.download='StreamDock-Teste-Individual.zip';document.body.appendChild(a);a.click();a.remove();
+      if(!response.ok){
+        let message='Não foi possível preparar o download.';
+        try{
+          const data=await response.json();
+          if(data.error==='limite_temporario_de_novas_licencas')message='Muitas tentativas nesta rede. Tente novamente mais tarde.';
+          else if(data.error==='verificacao_turnstile_invalida')message='A verificação expirou ou foi recusada. Tente novamente.';
+        }catch(e){}
+        throw new Error(message);
+      }
+      const blob=await response.blob();
+      if(!active||currentSequence!==sequence)return;
+      const localUrl=URL.createObjectURL(blob);
+      const link=document.createElement('a');
+      link.href=localUrl;
+      link.download='StreamDock-Teste-Individual.zip';
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
       setTimeout(()=>URL.revokeObjectURL(localUrl),60000);
-      showStatus('Download iniciado.');
-    }catch(e){showStatus(e.message||'Falha no download.');}
-    finally{token='';submit.disabled=true;if(widgetId!==null&&window.turnstile)turnstile.reset(widgetId);}
-  });
+      active=false;
+      sequence++;
+      overlay.hidden=true;
+      // O navegador assume o download; nao solicitar uma segunda verificacao.
+      resetWidget();
+    }catch(error){
+      if(active&&currentSequence===sequence){
+        showStatus((error&&error.message?error.message:'Falha no download.')+' A verificação será renovada.');
+        // Apenas falhas permitem nova verificacao, nunca uma resposta de sucesso.
+        resetWidget();
+        setTimeout(()=>{if(active&&!downloading&&currentSequence===sequence)renderWidget(currentSequence);},350);
+      }
+    }finally{
+      downloading=false;
+    }
+  }
+  function renderWidget(currentSequence){
+    if(!active||currentSequence!==sequence)return;
+    if(TURNSTILE_SITE_KEY.startsWith('COLE_')){
+      showStatus('Configure a Site Key pública do Turnstile no HTML.');
+      return;
+    }
+    if(!window.turnstile){
+      setTimeout(()=>renderWidget(currentSequence),250);
+      return;
+    }
+    if(widgetId!==null)return;
+    widgetId=turnstile.render('#trial-widget',{
+      sitekey:TURNSTILE_SITE_KEY,
+      action:'trial_download',
+      callback:function(token){
+        if(!active||currentSequence!==sequence)return;
+        download(token,currentSequence);
+      },
+      'expired-callback':function(){if(active&&currentSequence===sequence&&!downloading)showStatus('Verificação expirada. Tente novamente.');},
+      'error-callback':function(){if(active&&currentSequence===sequence&&!downloading)showStatus('Falha na verificação. Feche e abra novamente.');}
+    });
+    showStatus('Aguardando verificação de segurança...');
+  }
+  function open(event){
+    event.preventDefault();
+    if(active||downloading)return;
+    resetWidget();
+    active=true;
+    sequence++;
+    overlay.hidden=false;
+    showStatus('Aguardando verificação de segurança...');
+    renderWidget(sequence);
+  }
+  document.querySelectorAll('[data-trial-download]').forEach(el=>el.addEventListener('click',open));
+  document.getElementById('trial-close').addEventListener('click',close);
+  overlay.addEventListener('click',e=>{if(e.target===overlay)close();});
 })();
 </script>
 </body></html>
