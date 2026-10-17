@@ -5,15 +5,25 @@ const storeKey='gabilangames_pix_pedido_v1';
 let order=null,busy=false,pollTimer=null;
 let savedOrder=null;
 const start=$('pix-start-btn');
+const modal=$('pix-modal');
+const opener=$('pix-open-checkout');
+let focusBeforeModal=null;
+function openModal(){focusBeforeModal=document.activeElement;modal.hidden=false;modal.setAttribute('aria-hidden','false');document.body.classList.add('pix-modal-open');$('pix-modal-close').focus();if(!order&&savedOrder)resumeSaved();}
+function closeModal(){modal.hidden=true;modal.setAttribute('aria-hidden','true');document.body.classList.remove('pix-modal-open');if(focusBeforeModal&&typeof focusBeforeModal.focus==='function')focusBeforeModal.focus();}
+opener.addEventListener('click',e=>{e.preventDefault();openModal()});
+$('pix-price-open').addEventListener('click',()=>opener.click());
+$('pix-modal-close').addEventListener('click',closeModal);
+modal.querySelector('.pix-modal-backdrop').addEventListener('click',closeModal);
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!modal.hidden)closeModal();if(e.key==='Tab'&&!modal.hidden){const els=[...modal.querySelectorAll('button:not([disabled]):not([hidden]),input:not([disabled]):not([hidden]),textarea:not([disabled]):not([hidden])')].filter(x=>x.getClientRects().length);if(!els.length)return;const first=els[0],last=els[els.length-1];if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}});
 function status(msg,stage){$('pix-status').textContent=msg;if(stage)$('pix-stage').textContent=stage;}
 function setBusy(value){busy=value;[start,$('pix-check')].forEach(e=>{e.disabled=value});}
 async function api(path,body){const ctrl=new AbortController(),t=setTimeout(()=>ctrl.abort(),15000);try{const response=await fetch(API+path,{method:'POST',mode:'cors',headers:{'Content-Type':'application/json'},body:JSON.stringify(body),signal:ctrl.signal,credentials:'omit'});let data;try{data=await response.json()}catch{throw new Error('Resposta inválida do servidor.')}if(!response.ok||data.success!==true)throw new Error(data.erro||`Erro HTTP ${response.status}`);return data;}finally{clearTimeout(t)}}
 function save(o){order=o;savedOrder=o;try{sessionStorage.setItem(storeKey,JSON.stringify(o))}catch{}}
 function restore(){try{const s=JSON.parse(sessionStorage.getItem(storeKey));if(s&&typeof s.id==='string'&&/^[a-f0-9-]{36}$/i.test(s.id)&&/^[a-f0-9]{64}$/i.test(s.acesso))savedOrder=s}catch{}}
 function identity(){return {id:order.id,acesso:order.acesso}}
-function showOrder(){if(!order)return;$('pix-start').hidden=true;$('pix-order').hidden=false;$('pix-details').hidden=true;$('pix-license-panel').hidden=true;}
+function showOrder(){if(!order)return;$('pix-modal-title').textContent='Pague com Pix';$('pix-modal-intro').textContent='Escaneie o QR Code ou copie o código Pix. Acompanhe a confirmação aqui.';$('pix-start').hidden=true;$('pix-order').hidden=false;$('pix-details').hidden=true;$('pix-license-panel').hidden=true;}
 function updateResume(){ $('pix-resume').hidden=!savedOrder; }
-function newPurchase(){if(busy)return;if(order && !confirm('Seu pedido anterior continuará existente. Você poderá retomar o pedido nesta aba enquanto a sessão estiver disponível. Deseja iniciar outra compra?'))return;stopPoll();order=null;$('pix-order').hidden=true;$('pix-start').hidden=false;$('pix-details').hidden=true;$('pix-license-panel').hidden=true;$('pix-code').value='';$('pix-image').removeAttribute('src');status('Informe seu e-mail para iniciar uma nova compra.','Pronto para começar');updateResume();}
+function newPurchase(){if(busy)return;if(order && !confirm('Seu pedido anterior continuará existente. Você poderá retomar o pedido nesta aba enquanto a sessão estiver disponível. Deseja iniciar outra compra?'))return;stopPoll();order=null;$('pix-modal-title').textContent='Comprar licença via Pix';$('pix-modal-intro').textContent='Informe seu e-mail para continuar. Depois, escaneie o QR Code ou copie o código Pix.';$('pix-order').hidden=true;$('pix-start').hidden=false;$('pix-details').hidden=true;$('pix-license-panel').hidden=true;$('pix-code').value='';$('pix-image').removeAttribute('src');status('Informe seu e-mail para iniciar uma nova compra.','Pronto para começar');updateResume();}
 async function resumeSaved(){if(busy||!savedOrder)return;order=savedOrder;showOrder();setBusy(true);try{const done=await consult();if(!done){try{const q=await api('/pedido/qrcode',identity());showQr(q)}catch{status('Pedido retomado. A cobrança pode ter sido concluída ou expirado.','Pedido anterior')}}schedulePoll()}catch(e){status('Não foi possível retomar o pedido: '+e.message,'Falha')}finally{setBusy(false)}}
 async function copy(text,button){try{await navigator.clipboard.writeText(text);let prev=button.textContent;button.textContent='Copiado!';setTimeout(()=>button.textContent=prev,1700)}catch{status('Não foi possível copiar automaticamente. Copie manualmente.')}}
 function showQr(p){const pix=p.pix||{},v=p.cobranca||{};const qr=$('pix-image');const code=$('pix-code');const value=pix.copiaECola||'';if(value){code.value=value;$('pix-copy-row').hidden=false}else{$('pix-copy-row').hidden=true;code.value=''}const img=pix.imagemQrcode||'';if(typeof img==='string' && (/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(img)||/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(img))){qr.src=img;qr.hidden=false}else{qr.hidden=true;qr.removeAttribute('src')} $('pix-details').hidden=(!value&&qr.hidden);if(v.statusEfi==='CONCLUIDA')status('Cobrança concluída na Efí. Verifique o status do pedido.','Pagamento localizado');else if(value)status('Escaneie o QR Code ou copie o código Pix para pagar R$ 9,99.','Aguardando pagamento');else status(p.mensagem||'QR Code não disponível.','Consulta realizada');}
@@ -26,6 +36,36 @@ start.addEventListener('click',begin);$('pix-new-purchase').addEventListener('cl
 
 $('pix-copy-btn').addEventListener('click',()=>copy($('pix-code').value,$('pix-copy-btn')));
 $('pix-copy-license').addEventListener('click',()=>copy($('pix-license').textContent,$('pix-copy-license')));
+// Janela independente para recuperar a licença, sem modificar o fluxo Pix.
+const recoveryModal=$('recovery-modal');
+let recoveryPreviousFocus=null;
+function openRecoveryModal(){
+  if(!modal.hidden)closeModal();
+  recoveryPreviousFocus=document.activeElement;
+  recoveryModal.hidden=false;
+  recoveryModal.setAttribute('aria-hidden','false');
+  document.body.classList.add('pix-modal-open');
+  $('license-recovery-email').focus();
+}
+function closeRecoveryModal(){
+  recoveryModal.hidden=true;
+  recoveryModal.setAttribute('aria-hidden','true');
+  document.body.classList.remove('pix-modal-open');
+  if(recoveryPreviousFocus&&typeof recoveryPreviousFocus.focus==='function')recoveryPreviousFocus.focus();
+}
+$('recovery-open').addEventListener('click',openRecoveryModal);
+$('recovery-modal-close').addEventListener('click',closeRecoveryModal);
+recoveryModal.querySelector('.pix-modal-backdrop').addEventListener('click',closeRecoveryModal);
+document.addEventListener('keydown',e=>{
+  if(recoveryModal.hidden)return;
+  if(e.key==='Escape'){e.preventDefault();closeRecoveryModal();return;}
+  if(e.key!=='Tab')return;
+  const els=[...recoveryModal.querySelectorAll('button:not([disabled]),input:not([disabled])')].filter(x=>x.getClientRects().length);
+  if(!els.length)return;
+  const first=els[0],last=els[els.length-1];
+  if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+  else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+});
 const recoveryForm=$('license-recovery-form');
 recoveryForm.addEventListener('submit',async(event)=>{
   event.preventDefault();
