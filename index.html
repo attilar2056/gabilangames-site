@@ -260,7 +260,7 @@ a[data-trial-download].trial-busy {
     awaitingToken=true;
     setBusy(true);
     const run=++attempt;
-    timeoutId=setTimeout(()=>expireAttempt(run),10000);
+    timeoutId=setTimeout(()=>expireAttempt(run),30000);
     startChallenge(run);
   }
   document.querySelectorAll('[data-trial-download]').forEach(el=>el.addEventListener('click',open));
