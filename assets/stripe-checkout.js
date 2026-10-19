@@ -4,7 +4,7 @@ const $=id=>document.getElementById(id);
 const modal=$('stripe-modal'),info=$('stripe-message'),entry=$('stripe-entry'),pay=$('stripe-pay'),success=$('stripe-success');
 const key='gg_stripe_checkout_test_v1';let stored=null,instance=null,busy=false,watch=null;
 const br=(navigator.language||'').toLowerCase()==='pt-br';
-const currency=br?'BRL':'USD',price=br?'R$ 0,50':'US$ 2,99';
+const currency=br?'BRL':'USD',price=br?'R$ 14,99':'US$ 2,99';
 for(const el of document.querySelectorAll('[data-stripe-price]'))el.textContent=price;
 const card=$('stripe-open');if(card){card.setAttribute('aria-label','Comprar com cartão via Stripe - '+price);}
 const top=$('stripe-price-open');if(top){top.disabled=false;top.removeAttribute('title');top.setAttribute('aria-label','Pagar com cartão - '+price)}
