@@ -1,5 +1,7 @@
 (()=>{'use strict';
 const API='https://gabilangames-pix.atilar55.workers.dev';
+const RECOVERY_API='https://streamdock-license-recovery.atilar55.workers.dev';
+async function recoverLicenseEmail(email){const r=await fetch(RECOVERY_API+'/licenca/recuperar',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email})});if(!r.ok)throw Error('HTTP '+r.status);return r.json();}
 const $=id=>document.getElementById(id);
 const storeKey='gabilangames_pix_pedido_v2';
 const LEGACY_KEY='gabilangames_pix_pedido_v1';
@@ -163,7 +165,7 @@ recoveryForm.addEventListener('submit',async(event)=>{
   const button=$('license-recovery-submit'),message=$('license-recovery-status');
   if(!/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email)||email.length>254){message.textContent='Informe um e-mail válido.';return;}
   button.disabled=true;button.textContent='Enviando solicitação...';message.textContent='Aguarde enquanto processamos sua solicitação.';
-  try{await api('/licenca/recuperar',{email});message.textContent='Se houver licenças comerciais associadas a este e-mail, enviaremos suas chaves. Confira sua caixa de entrada e spam.';}
+  try{await recoverLicenseEmail(email);message.textContent='Se houver licenças comerciais associadas a este e-mail, enviaremos suas chaves. Confira sua caixa de entrada e spam.';}
   catch(e){message.textContent='Não foi possível processar a solicitação agora: '+e.message;}
   finally{button.disabled=false;button.textContent='Enviar licença por e-mail';}
 });
