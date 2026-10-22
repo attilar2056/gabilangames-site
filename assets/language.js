@@ -39,6 +39,7 @@ function update(){document.documentElement.lang=lang==='pt'?'pt-BR':lang;documen
  const brazil=lang==='pt';
  for(const id of ['pix-price-open','pix-open-checkout']){const el=document.getElementById(id);if(el)el.hidden=!brazil;}
  const separator=document.querySelector('#purchase-price-options > b');if(separator)separator.hidden=!brazil;
+ window.dispatchEvent(new Event('gabilan-language-change'));
  for(const el of document.querySelectorAll('[aria-label],[title],[placeholder]')){
   for(const attr of ['aria-label','title','placeholder']){
    const val=el.getAttribute(attr);if(!val)continue;
