@@ -91,6 +91,11 @@ body{background:#031024;color:#eff5ff}html{scroll-padding-top:82px}
 </style><style>
 .purchase-price .price-choice{appearance:none;-webkit-appearance:none;border:1px solid transparent;border-radius:12px;background:transparent;color:var(--txt);font:inherit;font-size:clamp(25px,2.65vw,39px);font-weight:900;letter-spacing:-1.2px;white-space:nowrap;padding:5px 9px;margin:-5px -9px;transition:background .2s,border-color .2s,box-shadow .2s,transform .2s,color .2s;text-align:left}
 .purchase-price .price-choice small{font-size:11px;font-weight:400;color:#91b4e3;letter-spacing:0}
+/* Ícones compactos do preço: reutiliza a tradução de “Cartão” já existente. */
+.purchase-price .price-choice .price-icon-label{display:inline-flex;align-items:center;gap:5px;vertical-align:middle;white-space:nowrap;text-transform:uppercase;line-height:1.2}
+.purchase-price .price-choice .price-icon-label svg{display:block;width:16px;height:16px;flex:0 0 16px}
+.purchase-price .price-choice .price-icon-label-card svg{color:#1769e8}
+
 .purchase-price .price-choice-pix{cursor:pointer}
 .purchase-price .price-choice-pix:hover,.purchase-price .price-choice-pix:focus-visible{background:#183962;border-color:#369eff;box-shadow:0 0 20px #247bf34a;transform:translateY(-2px);color:#8dccff}
 .purchase-price .price-choice-pix:focus-visible{outline:2px solid #7bc4ff;outline-offset:3px}
@@ -249,10 +254,42 @@ body{background:#f4f7fb;color:#17243a}
 html:not([lang="pt-BR"]) #pix-price-open,html:not([lang="pt-BR"]) #purchase-price-options>b,html:not([lang="pt-BR"]) #pix-open-checkout{display:none!important}
 html:not([lang="pt-BR"]) .payment-cards{grid-template-columns:minmax(0,1fr)!important}
 html:not([lang="pt-BR"]) #purchase-price-options{justify-content:flex-start}
-</style></head><body>
-<header class="top"><div class="container nav"><a class="logo" href="#inicio">Gabilan <span>Games</span></a><nav aria-label="Navegação principal" class="links"><a href="#inicio">Início</a><a href="#comprar">Comprar</a><a href="#instalar">Instalação</a><a class="btn nav-trial" data-trial-download="1" href="#download">↓ Baixar teste</a></nav><div class="gg-language"><label for="gg-language">Idioma / Language</label><select id="gg-language" aria-label="Idioma / Language"><option value="pt">Português</option><option value="en">English</option><option value="es">Español</option><option value="ar">العربية</option><option value="de">Deutsch</option><option value="zh-CN">简体中文</option><option value="zh-TW">繁體中文</option><option value="ko">한국어</option><option value="fr">Français</option><option value="it">Italiano</option><option value="ja">日本語</option><option value="pl">Polski</option><option value="ru">Русский</option></select></div></div></header>
+</style>
+<style id="gg-logo-oficial-2026">
+/* Somente visual: substitui o quadrado azul do cabecalho pela marca enviada. */
+.top .logo::before{
+  content:"";
+  display:inline-block;
+  width:54px;
+  height:54px;
+  flex:0 0 54px;
+  border-radius:0;
+  background:transparent url("assets/gabilan-games-marca.png") center / contain no-repeat;
+  box-shadow:none;
+}
+@media(max-width:650px){
+  .top .logo::before{width:43px;height:43px;flex-basis:43px}
+}
+@media(max-width:360px){
+  .top .logo::before{width:38px;height:38px;flex-basis:38px}
+}
+</style>
+
+
+
+
+
+<style id="gg-logo-icon-only-2026">
+/* Somente o icone original no cabecalho: o nome permanece oculto visualmente para acessibilidade. */
+.top .logo{display:inline-flex;align-items:center;gap:0;min-height:54px;font-size:0;line-height:0}
+.top .logo .sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+@media(max-width:650px){.top .logo{min-height:43px}}
+@media(max-width:360px){.top .logo{min-height:38px}}
+</style>
+</head><body>
+<header class="top"><div class="container nav"><a class="logo" href="#inicio" aria-label="GABILAN GAMES"><span class="sr-only">GABILAN GAMES</span></a><nav aria-label="Navegação principal" class="links"><a href="#inicio">Início</a><a href="#comprar">Comprar</a><a href="#instalar">Instalação</a><a class="btn nav-trial" data-trial-download="1" href="#download">↓ Baixar teste</a></nav><div class="gg-language"><label for="gg-language">Idioma / Language</label><select id="gg-language" aria-label="Idioma / Language"><option value="pt">Português</option><option value="en">English</option><option value="es">Español</option><option value="ar">العربية</option><option value="de">Deutsch</option><option value="zh-CN">简体中文</option><option value="zh-TW">繁體中文</option><option value="ko">한국어</option><option value="fr">Français</option><option value="it">Italiano</option><option value="ja">日本語</option><option value="pl">Polski</option><option value="ru">Русский</option></select></div></div></header>
 <main><section class="hero" id="inicio"><div class="container hero-inner"><div class="hero-copy"><span class="tag">INTEGRAÇÃO STREAMDOCK + ELGATO STREAM DECK</span><h1>Use seu StreamDock no software da <span class="grad">Elgato Stream Deck</span></h1><p class="intro">Uma integração simples e eficiente para usar seu dispositivo compatível com o Elgato Stream Deck.</p><div class="actions"><a class="btn" data-trial-download="1" href="#download">↓ Baixar versão de teste</a><a class="hero-more" href="#comprar">Saiba mais →</a></div><div class="subnote">◷ Teste grátis por 7 dias</div></div><div class="hero-art"><img alt="Controlador StreamDock com tela e botões configuráveis" class="hero-main-device" src="assets/n4pro.webp"/></div><div class="hero-benefits"><div><span class="benefit-symbol">ϟ</span><span>Compatível com diversos modelos</span></div><div><span class="benefit-symbol">◇</span><span>Confiável e seguro</span></div><div><span class="benefit-symbol">⚙</span><span>Fácil de usar</span></div></div></div></section>
-<section class="section purchase-section" id="comprar"><div class="container purchase-layout"><div class="purchase-copy"><span class="tag">LICENÇA COMPLETA</span><h2>Garanta sua <span class="grad">licença</span></h2><p>Pagamento seguro e ativação após a confirmação. Pagamento único, sem assinatura.</p><div class="purchase-price" id="purchase-price-options"><button class="price-choice price-choice-pix" type="button" id="pix-price-open" aria-label="Comprar por R$ 9,99 via Pix" aria-controls="pix-modal" aria-haspopup="dialog">R$ 9,99 <small>BRL · PIX</small></button><b>ou</b><button class="price-choice price-choice-paypal" type="button" id="stripe-price-open"><span data-stripe-price>US$ 2,99</span> <small>CARTÃO · CRÉDITO</small></button></div><div class="recovery-shortcut"><span class="recovery-emblem">♧</span><span><strong>Já possui uma licença?</strong><small>Recupere sua chave pelo e-mail utilizado na compra.</small></span><button class="btn recovery-button" type="button" id="recovery-open" aria-haspopup="dialog" aria-controls="recovery-modal">Recuperar licença →</button></div></div><div class="payment-selection"><h3>Escolha sua forma de pagamento</h3><div class="payment-cards"><a aria-controls="pix-modal" aria-haspopup="dialog" class="payment-card selected" href="#comprar" id="pix-open-checkout" role="button"><span class="payment-icon payment-icon-pix"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="36" height="36" fill="none" aria-hidden="true" focusable="false"><defs><clipPath id="payment-pix-clip"><rect x="9.5" y="9.5" width="29" height="29" rx="8.5" transform="rotate(45 24 24)"/></clipPath></defs><rect x="9.5" y="9.5" width="29" height="29" rx="8.5" transform="rotate(45 24 24)" fill="#32bcad"/><g clip-path="url(#payment-pix-clip)" stroke="#fff" stroke-width="3.1" stroke-linecap="round"><path d="M9.5 16c6-3.2 8.9 4 14.5 8 5.6-4 8.5-11.2 14.5-8"/><path d="M9.5 32c6 3.2 8.9-4 14.5-8 5.6 4 8.5 11.2 14.5 8"/></g></svg></span><strong>PIX</strong><small>Pagamento rápido e seguro</small><b>R$ 9,99</b></a><a href="#comprar" class="payment-card" id="stripe-open" role="button" aria-haspopup="dialog" aria-controls="stripe-modal"><span class="payment-icon payment-icon-card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="6" y="10" width="36" height="28" rx="5"/><path d="M6 19h36M13 30h10"/></svg></span><span class="payment-card-heading"><strong>Cartão</strong><span class="payment-info" tabindex="0" role="img" aria-label="Visa, Mastercard, American Express, Discover, Diners Club, UnionPay, JCB, Elo, Hipercard" aria-describedby="payment-brands-tooltip" onclick="event.preventDefault();event.stopPropagation()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation()}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true" focusable="false"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/></svg><span class="payment-brands-tooltip" id="payment-brands-tooltip" role="tooltip"><span class="payment-brand payment-brand-visa">VISA</span><span class="payment-brand payment-brand-mastercard"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 31 18" width="31" height="18" aria-hidden="true"><circle cx="11" cy="9" r="8" fill="#eb001b"/><circle cx="20" cy="9" r="8" fill="#f79e1b" fill-opacity=".92"/></svg><span>Mastercard</span></span><span class="payment-brand payment-brand-amex">AMEX</span><span class="payment-brand payment-brand-discover">Discover</span><span class="payment-brand payment-brand-diners">Diners Club</span><span class="payment-brand payment-brand-union">UnionPay</span><span class="payment-brand payment-brand-jcb">JCB</span><span class="payment-brand payment-brand-elo">elo</span><span class="payment-brand payment-brand-hiper">Hipercard</span></span></span></span><small>Checkout seguro Stripe · Google Pay quando disponível</small><b data-stripe-price>US$ 2,99</b></a></div><p class="payment-security">♙ Pagamento 100% seguro</p></div></div></section><div aria-hidden="true" class="pix-modal" hidden="" id="pix-modal"><div class="pix-modal-backdrop" data-pix-close="1"></div><section aria-labelledby="pix-modal-title" aria-modal="true" class="pix-modal-dialog" role="dialog" tabindex="-1"><div class="pix-modal-top"><div><span class="tag">PAGAMENTO SEGURO</span><h2 id="pix-modal-title">Comprar licença via Pix</h2><p id="pix-modal-intro">Informe o e-mail para vincular sua compra e receber sua licença.</p></div><button aria-label="Fechar janela de pagamento" class="pix-modal-close" id="pix-modal-close" type="button">×</button></div><div class="checkout-box card"><div class="checkout-head"><div><h3>R$ 9,99 via Pix</h3></div><span class="checkout-pill" id="pix-stage" hidden>Pronto para começar</span></div><p aria-live="polite" id="pix-status" role="status" hidden>Clique em iniciar compra para gerar seu pedido.</p><div id="pix-start"><label class="pix-email-label" for="pix-buyer-email">E-mail para vincular a licença</label><input aria-describedby="pix-email-hint" autocomplete="email" id="pix-buyer-email" inputmode="email" maxlength="254" placeholder="seuemail@exemplo.com" required="" type="email"/><p class="checkout-hint" id="pix-email-hint">A licença será enviada para este e-mail após o pagamento.</p><button class="btn" id="pix-start-btn" type="button">Continuar para o Pix</button><div class="actions" style="margin-top:10px"><button class="smallbutton" hidden="" id="pix-resume" type="button">Continuar Pix anterior</button></div></div><div hidden="" id="pix-order"><div id="pix-qr-loading" class="pix-qr-loading" hidden role="status" aria-live="polite"><div class="pix-recipient-notice"><span class="pix-recipient-label">NOTA IMPORTANTE SOBRE O PIX</span><p>Na tela do seu banco, o recebedor do Pix aparecerá como:</p><strong class="pix-recipient-name">Rosanna Cristhina de olivera Guilherme</strong><p class="pix-recipient-explanation">Esta é nossa intermediária oficial de pagamentos.</p></div><div class="pix-qr-animation"><span class="pix-loader-spinner" aria-hidden="true"></span><strong>Preparando seu Pix...</strong><small>O QR Code será exibido em instantes.</small></div></div><div id="pix-timer-box" class="pix-timer-box" hidden><span class="pix-clock-icon" aria-hidden="true">◷</span><span><strong id="pix-countdown" role="timer">30:00</strong><small>Tempo para continuar este Pix neste navegador</small></span></div><div hidden="" id="pix-details"><img alt="QR Code Pix" class="checkout-qr" hidden="" id="pix-image"/><div class="checkout-copy" hidden="" id="pix-copy-row"><textarea aria-label="Código Pix Copia e Cola" id="pix-code" readonly="" rows="3"></textarea><button class="btn" id="pix-copy-btn" type="button">Copiar código Pix</button></div></div><div class="actions" id="pix-order-actions"><button class="btn alt" id="pix-check" type="button">Verificar pagamento</button><button class="smallbutton" id="pix-cancel" type="button">Cancelar pagamento</button><button class="smallbutton" id="pix-new-purchase" type="button" hidden>Trocar e-mail</button></div></div><p class="checkout-hint" id="pix-environment-warning">Pagamento seguro • Licença liberada após a confirmação.</p></div><div class="pix-success-screen" id="pix-success-screen" hidden aria-live="polite">
+<section class="section purchase-section" id="comprar"><div class="container purchase-layout"><div class="purchase-copy"><span class="tag">LICENÇA COMPLETA</span><h2>Garanta sua <span class="grad">licença</span></h2><p>Pagamento seguro e ativação após a confirmação. Pagamento único, sem assinatura.</p><div class="purchase-price" id="purchase-price-options"><button class="price-choice price-choice-pix" type="button" id="pix-price-open" aria-label="Comprar por R$ 9,99 via Pix" aria-controls="pix-modal" aria-haspopup="dialog">R$ 9,99 <small class="price-icon-label price-icon-label-pix"><svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><defs><clipPath id="purchase-pix-clip"><rect x="9.5" y="9.5" width="29" height="29" rx="8.5" transform="rotate(45 24 24)"/></clipPath></defs><rect x="9.5" y="9.5" width="29" height="29" rx="8.5" transform="rotate(45 24 24)" fill="#32bcad"/><g clip-path="url(#purchase-pix-clip)" stroke="#fff" stroke-width="3.1" stroke-linecap="round" fill="none"><path d="M9.5 16c6-3.2 8.9 4 14.5 8 5.6-4 8.5-11.2 14.5-8"/><path d="M9.5 32c6 3.2 8.9-4 14.5-8 5.6 4 8.5 11.2 14.5 8"/></g></svg>PIX</small></button><b>ou</b><button class="price-choice price-choice-paypal" type="button" id="stripe-price-open"><span data-stripe-price>US$ 2,99</span> <small class="price-icon-label price-icon-label-card"><svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="6" y="10" width="36" height="28" rx="5"/><path d="M6 19h36M13 30h10"/></svg>Cartão</small></button></div><div class="recovery-shortcut"><span class="recovery-emblem">♧</span><span><strong>Já possui uma licença?</strong><small>Recupere sua chave pelo e-mail utilizado na compra.</small></span><button class="btn recovery-button" type="button" id="recovery-open" aria-haspopup="dialog" aria-controls="recovery-modal">Recuperar licença →</button></div></div><div class="payment-selection"><h3>Escolha sua forma de pagamento</h3><div class="payment-cards"><a aria-controls="pix-modal" aria-haspopup="dialog" class="payment-card selected" href="#comprar" id="pix-open-checkout" role="button"><span class="payment-icon payment-icon-pix"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="36" height="36" fill="none" aria-hidden="true" focusable="false"><defs><clipPath id="payment-pix-clip"><rect x="9.5" y="9.5" width="29" height="29" rx="8.5" transform="rotate(45 24 24)"/></clipPath></defs><rect x="9.5" y="9.5" width="29" height="29" rx="8.5" transform="rotate(45 24 24)" fill="#32bcad"/><g clip-path="url(#payment-pix-clip)" stroke="#fff" stroke-width="3.1" stroke-linecap="round"><path d="M9.5 16c6-3.2 8.9 4 14.5 8 5.6-4 8.5-11.2 14.5-8"/><path d="M9.5 32c6 3.2 8.9-4 14.5-8 5.6 4 8.5 11.2 14.5 8"/></g></svg></span><strong>PIX</strong><small>Pagamento rápido e seguro</small><b>R$ 9,99</b></a><a href="#comprar" class="payment-card" id="stripe-open" role="button" aria-haspopup="dialog" aria-controls="stripe-modal"><span class="payment-icon payment-icon-card"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" width="36" height="36" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><rect x="6" y="10" width="36" height="28" rx="5"/><path d="M6 19h36M13 30h10"/></svg></span><span class="payment-card-heading"><strong>Cartão</strong><span class="payment-info" tabindex="0" role="img" aria-label="Visa, Mastercard, American Express, Discover, Diners Club, UnionPay, JCB, Elo, Hipercard" aria-describedby="payment-brands-tooltip" onclick="event.preventDefault();event.stopPropagation()" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();event.stopPropagation()}"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16" fill="currentColor" aria-hidden="true" focusable="false"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0"/></svg><span class="payment-brands-tooltip" id="payment-brands-tooltip" role="tooltip"><span class="payment-brand payment-brand-visa">VISA</span><span class="payment-brand payment-brand-mastercard"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 31 18" width="31" height="18" aria-hidden="true"><circle cx="11" cy="9" r="8" fill="#eb001b"/><circle cx="20" cy="9" r="8" fill="#f79e1b" fill-opacity=".92"/></svg><span>Mastercard</span></span><span class="payment-brand payment-brand-amex">AMEX</span><span class="payment-brand payment-brand-discover">Discover</span><span class="payment-brand payment-brand-diners">Diners Club</span><span class="payment-brand payment-brand-union">UnionPay</span><span class="payment-brand payment-brand-jcb">JCB</span><span class="payment-brand payment-brand-elo">elo</span><span class="payment-brand payment-brand-hiper">Hipercard</span></span></span></span><small>Checkout seguro Stripe · Google Pay quando disponível</small><b data-stripe-price>US$ 2,99</b></a></div><p class="payment-security">♙ Pagamento 100% seguro</p></div></div></section><div aria-hidden="true" class="pix-modal" hidden="" id="pix-modal"><div class="pix-modal-backdrop" data-pix-close="1"></div><section aria-labelledby="pix-modal-title" aria-modal="true" class="pix-modal-dialog" role="dialog" tabindex="-1"><div class="pix-modal-top"><div><span class="tag">PAGAMENTO SEGURO</span><h2 id="pix-modal-title">Comprar licença via Pix</h2><p id="pix-modal-intro">Informe o e-mail para vincular sua compra e receber sua licença.</p></div><button aria-label="Fechar janela de pagamento" class="pix-modal-close" id="pix-modal-close" type="button">×</button></div><div class="checkout-box card"><div class="checkout-head"><div><h3>R$ 9,99 via Pix</h3></div><span class="checkout-pill" id="pix-stage" hidden>Pronto para começar</span></div><p aria-live="polite" id="pix-status" role="status" hidden>Clique em iniciar compra para gerar seu pedido.</p><div id="pix-start"><label class="pix-email-label" for="pix-buyer-email">E-mail para vincular a licença</label><input aria-describedby="pix-email-hint" autocomplete="email" id="pix-buyer-email" inputmode="email" maxlength="254" placeholder="seuemail@exemplo.com" required="" type="email"/><p class="checkout-hint" id="pix-email-hint">A licença será enviada para este e-mail após o pagamento.</p><button class="btn" id="pix-start-btn" type="button">Continuar para o Pix</button><div class="actions" style="margin-top:10px"><button class="smallbutton" hidden="" id="pix-resume" type="button">Continuar Pix anterior</button></div></div><div hidden="" id="pix-order"><div id="pix-qr-loading" class="pix-qr-loading" hidden role="status" aria-live="polite"><div class="pix-recipient-notice"><span class="pix-recipient-label">NOTA IMPORTANTE SOBRE O PIX</span><p>Na tela do seu banco, o recebedor do Pix aparecerá como:</p><strong class="pix-recipient-name">Rosanna Cristhina de olivera Guilherme</strong><p class="pix-recipient-explanation">Esta é nossa intermediária oficial de pagamentos.</p></div><div class="pix-qr-animation"><span class="pix-loader-spinner" aria-hidden="true"></span><strong>Preparando seu Pix...</strong><small>O QR Code será exibido em instantes.</small></div></div><div id="pix-timer-box" class="pix-timer-box" hidden><span class="pix-clock-icon" aria-hidden="true">◷</span><span><strong id="pix-countdown" role="timer">30:00</strong><small>Tempo para continuar este Pix neste navegador</small></span></div><div hidden="" id="pix-details"><img alt="QR Code Pix" class="checkout-qr" hidden="" id="pix-image"/><div class="checkout-copy" hidden="" id="pix-copy-row"><textarea aria-label="Código Pix Copia e Cola" id="pix-code" readonly="" rows="3"></textarea><button class="btn" id="pix-copy-btn" type="button">Copiar código Pix</button></div></div><div class="actions" id="pix-order-actions"><button class="btn alt" id="pix-check" type="button">Verificar pagamento</button><button class="smallbutton" id="pix-cancel" type="button">Cancelar pagamento</button><button class="smallbutton" id="pix-new-purchase" type="button" hidden>Trocar e-mail</button></div></div><p class="checkout-hint" id="pix-environment-warning">Pagamento seguro • Licença liberada após a confirmação.</p></div><div class="pix-success-screen" id="pix-success-screen" hidden aria-live="polite">
 <div class="pix-success-check" aria-hidden="true"><svg viewBox="0 0 84 84" focusable="false"><circle class="pix-success-ring" cx="42" cy="42" r="35"/><path class="pix-success-tick" d="M24 42 L36 54 L60 30"/></svg></div>
 <h2>Transação concluída</h2>
 <p class="pix-success-subtitle">Seu pagamento foi aprovado e sua licença já está disponível.</p>
@@ -471,4 +508,204 @@ input[type="email"],input[type="text"],code,pre{direction:ltr;unicode-bidi:plain
 <div id="stripe-entry"><form id="stripe-form"><label class="stripe-field" for="stripe-email">E-mail para receber a licença</label><input required type="email" autocomplete="email" maxlength="254" id="stripe-email" placeholder="seuemail@exemplo.com"><p class="stripe-steps">A cobrança é feita pela Stripe. Não armazenamos dados do seu cartão.</p><button class="btn" id="stripe-submit" type="submit">Continuar para o pagamento</button></form></div>
 <div id="stripe-pay" hidden><div id="stripe-embedded"></div><div class="stripe-actions"><button type="button" class="btn" id="stripe-verify">Verificar pagamento</button><button type="button" class="btn secondary" id="stripe-new">Iniciar outra compra</button></div></div>
 <div id="stripe-success" hidden class="pix-success-screen"><div class="pix-success-check" aria-hidden="true"><svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="35" class="pix-success-ring"></circle><path class="pix-success-tick" d="M23 40l12 12 23-26"></path></svg></div><h2>Transação concluída</h2><p class="pix-success-subtitle">Pagamento aprovado. Sua licença está disponível.</p><div class="pix-success-license"><label>Sua licença</label><p>Guarde esta chave para ativar o software.</p><code id="stripe-result-license"></code><button class="btn" type="button" id="stripe-copy">Copiar licença</button></div><div class="pix-success-email"><strong>Licença por e-mail</strong><p>O sistema também enviará uma cópia para <b id="stripe-result-email"></b>. Confira sua caixa de entrada, spam e lixeira.</p></div></div>
-</section></div><script defer src="assets/stripe-checkout.js?v=20261022-brl-usd-fix1"></script><script defer src="assets/language.js?v=20261022-brl-usd-fix1"></script></body></html>
+</section></div><script defer src="assets/stripe-checkout.js?v=20261022-brl-usd-fix1"></script><script defer src="assets/language.js?v=20261022-brl-usd-fix1"></script>
+<style id="gg-storefront-layout-2026">
+/*
+ * Gabilan Games — novo layout da pagina de vendas (2026-10-23)
+ * Exclusivamente visual: sem mudar textos, IDs, estados, scripts ou checkout.
+ * Estilo limitado aos blocos da pagina; modais Pix/Stripe/recuperacao ficam intactos.
+ */
+:root{--gg-ink:#11243d;--gg-deep:#071a34;--gg-blue:#216bff;--gg-cyan:#58dce8;--gg-surface:#fff;--gg-border:#e2e8f2}
+html{scroll-padding-top:102px}
+body{background:#f6f8fc;color:var(--gg-ink);-webkit-font-smoothing:antialiased}
+.container{width:min(1176px,calc(100% - 48px))}
+/* Cabecalho editorial e CTA de teste em destaque */
+.top{z-index:30;background:rgba(255,255,255,.97);border-bottom:1px solid #e3eaf4;box-shadow:0 5px 26px rgba(17,38,70,.045)}
+.nav{min-height:84px;gap:24px}
+.logo{font-size:22px;letter-spacing:-.85px;font-weight:900;color:#101f36;display:inline-flex;align-items:center;gap:10px}
+.logo:before{content:'';display:inline-block;width:33px;height:33px;flex:0 0 33px;border-radius:10px;background:linear-gradient(135deg,#5ae6fa 0%,#216bff 56%,#344fc6 100%);box-shadow:inset 0 1px 0 #ffffff8f,0 5px 12px #206cff33}
+.logo span{color:#236aff}
+.links{margin-left:auto;gap:30px}
+.links a:not(.btn){color:#485b76;font-weight:730;font-size:13px;letter-spacing:.01em;position:relative;padding:8px 0}
+.links a:not(.btn):hover{color:#185ee1}
+.links a:not(.btn):after{content:'';position:absolute;left:0;bottom:2px;width:0;height:2px;background:#256bfa;transition:width .22s ease}
+.links a:not(.btn):hover:after{width:100%}
+.top .nav-trial{border-radius:100px;padding:11px 19px;background:#1363e8;border:1px solid #1363e8;box-shadow:0 6px 18px #165fdd24;font-size:13px;font-weight:800}
+.top .nav-trial:hover{background:#054bd3;box-shadow:0 9px 22px #165fdd34}
+.gg-language{margin-left:4px;flex-shrink:0}
+.gg-language label{font-size:11px;letter-spacing:.015em;color:#687990}
+.gg-language select{border-radius:10px;background:#f5f8fd;border-color:#dfe7f2;min-height:37px;color:#203651;font-weight:650;font-size:12px;box-shadow:0 1px 2px #101b2d08}
+/* Hero visualmente marcante: banner de produto, sem mudar o link de download */
+.hero{position:relative;isolation:isolate;overflow:hidden;border-bottom:0;color:#fff;background:radial-gradient(ellipse at 70% 35%,#1f5bc6 0%,transparent 38%),radial-gradient(ellipse at 8% 86%,#173869 0%,transparent 50%),linear-gradient(123deg,#06152b 3%,#09264e 59%,#071935 100%)}
+.hero:before{content:'';position:absolute;inset:0;z-index:-1;pointer-events:none;opacity:.28;background-image:linear-gradient(#98c7fa13 1px,transparent 1px),linear-gradient(90deg,#98c7fa13 1px,transparent 1px);background-size:43px 43px;mask-image:linear-gradient(90deg,transparent 3%,#000 58%,#000 100%)}
+.hero:after{content:'';position:absolute;right:-225px;top:-280px;width:720px;height:720px;border:1px solid #b5d9ff24;border-radius:50%;box-shadow:0 0 0 105px #a8d6ff09,0 0 0 210px #a8d6ff07;z-index:-1;pointer-events:none}
+.hero-inner{min-height:600px;grid-template-columns:minmax(0,1.03fr) minmax(0,.97fr);column-gap:54px;row-gap:46px;padding:79px 0 30px;align-items:center}
+.hero-copy{z-index:1;max-width:630px;padding:6px 0 24px}
+.hero .tag{display:inline-flex;align-items:center;gap:8px;border-radius:999px;border:1px solid #67d4ee55;background:#0b44716e;color:#adf3ff;font-size:10px;font-weight:900;letter-spacing:1.25px;padding:9px 15px;box-shadow:inset 0 1px 0 #ffffff16}
+.hero .tag:before{content:'';width:7px;height:7px;border-radius:50%;background:#56ebed;box-shadow:0 0 0 4px #56ebed23}
+.hero h1{color:#fff;font-size:clamp(42px,4.2vw,65px);line-height:1.075;letter-spacing:-2.85px;margin:23px 0 21px;max-width:670px;font-weight:870}
+.hero h1 .grad{color:#75cfff;-webkit-text-fill-color:transparent;background:linear-gradient(90deg,#84e4ff 0%,#7aa8ff 54%,#9acfff 100%);-webkit-background-clip:text;background-clip:text}
+.hero .intro{color:#c7d9f0;font-size:17px;line-height:1.8;max-width:555px;margin:0}
+.hero .actions{align-items:center;gap:14px;margin:29px 0 17px}
+.hero .actions .btn{font-size:14px;padding:16px 24px;border-radius:12px;background:linear-gradient(105deg,#287eff,#185de5);border-color:#568eff;color:#fff;box-shadow:0 12px 28px #08112f66,inset 0 1px 0 #ffffff49}
+.hero .actions .btn:hover{box-shadow:0 17px 35px #06122e80;background:linear-gradient(105deg,#4794ff,#205ff2)}
+.hero-more{display:inline-flex;align-items:center;color:#e2efff;font-weight:750;font-size:13px;border:1px solid #c9e0ff4b;border-radius:12px;padding:15px 18px;background:#ffffff0c;transition:background .2s ease,border-color .2s ease}
+.hero-more:hover{color:#fff;background:#ffffff1a;border-color:#cde5ff8c}
+.hero .subnote{display:inline-flex;align-items:center;color:#b5efd4;font-size:12px;font-weight:750;letter-spacing:.01em}
+.hero-art{position:relative;min-height:365px;aspect-ratio:1.25;max-height:480px;padding:24px;display:grid;place-items:center;border-radius:31px;border:1px solid #8bb8f550;background:linear-gradient(141deg,#ffffff25 3%,#80bcff13 49%,#142d5580 100%);box-shadow:0 27px 80px #0410257a,inset 0 1px 1px #ffffff42;overflow:visible}
+.hero-art:before{content:'';position:absolute;width:80%;height:80%;inset:auto;border-radius:50%;background:#4ebfff80;filter:blur(74px);z-index:0}
+.hero-art:after{content:'';position:absolute;inset:13px;border:1px solid #ffffff1b;border-radius:23px;pointer-events:none}
+.hero-main-device{position:relative;z-index:1;width:100%;max-height:430px;object-fit:contain;filter:drop-shadow(0 21px 20px #001735aa);transform:scale(1.04);transition:transform .45s ease}
+.hero-art:hover .hero-main-device{transform:scale(1.08) translateY(-4px)}
+.hero-benefits{grid-column:1/-1;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0;border-top:1px solid #a8d6ff24;padding:22px 0 5px;margin-top:0;color:#d7e8fd}
+.hero-benefits>div{display:flex;align-items:center;gap:11px;font-size:13px;font-weight:660;padding:0 22px;min-width:0;border-right:1px solid #a8d6ff27}
+.hero-benefits>div:first-child{padding-left:0}.hero-benefits>div:last-child{border:0}
+.benefit-symbol{display:grid;place-items:center;width:33px;height:33px;flex:0 0 33px;min-width:0;border-radius:10px;background:#ffffff18;border:1px solid #a8d6ff26;color:#8ee4fd;font-size:20px}
+/* Area de venda: hierarquia limpa, preco evidente e meios de pagamento como cards */
+.purchase-section{background:#f7f9fd;border-top:0;border-bottom:1px solid #e4eaf3;position:relative;isolation:isolate;padding:98px 0 108px}
+.purchase-section:before{content:'';position:absolute;right:0;top:0;width:48%;height:100%;background:radial-gradient(ellipse at 55% 35%,#e0ecff 0%,transparent 62%);z-index:-1;pointer-events:none}
+.purchase-layout{grid-template-columns:minmax(0,.92fr) minmax(0,1fr);gap:68px;align-items:center}
+.purchase-copy{min-width:0}
+.purchase-copy>.tag{display:inline-flex;border-radius:999px;background:#e9f1ff;border:1px solid #c7dcff;color:#1e63d1;padding:8px 14px;font-size:10px;font-weight:900;letter-spacing:1.1px}
+.purchase-copy h2{color:#0e213e;font-size:clamp(40px,4vw,58px);line-height:1.12;letter-spacing:-2.2px;margin:20px 0 17px;font-weight:850}
+.purchase-copy h2 .grad{color:#216cfc;-webkit-text-fill-color:#216cfc}
+.purchase-copy>p{color:#62748c;font-size:16px;line-height:1.8;max-width:530px;margin:0 0 27px}
+.purchase-price{display:flex;align-items:center;gap:9px 12px;margin:18px 0 33px;flex-wrap:wrap}
+.purchase-price .price-choice{font-weight:880!important;letter-spacing:-1.15px!important;color:#14253f!important;font-size:clamp(28px,2.7vw,39px)!important;padding:8px 11px!important;margin:-8px -11px!important;border-radius:13px!important}
+.purchase-price .price-choice:not(:disabled):hover,.purchase-price .price-choice:not(:disabled):focus-visible{background:#eaf2ff!important;border-color:#b3cfff!important;box-shadow:0 5px 16px #2068e91a!important;color:#185edf!important;transform:translateY(-2px)}
+.purchase-price .price-choice small{font-weight:850!important;font-size:10px!important;letter-spacing:.1px!important;color:#60738e!important;vertical-align:middle}
+.purchase-price .price-choice .price-icon-label{gap:6px}
+.purchase-price .price-choice .price-icon-label svg{width:16px;height:16px}
+.purchase-price>b{font-size:13px;font-weight:750;color:#8a9bb0}
+.recovery-shortcut{background:#fff;border:1px solid #e0e8f3;border-radius:18px;box-shadow:0 9px 28px #1a3e7708;padding:19px;gap:15px;min-height:100px;margin-top:33px}
+.recovery-emblem{width:43px;height:43px;flex:0 0 43px;background:#eaf2ff;border:1px solid #d8e5ff;border-radius:13px;color:#2065dd;font-size:25px}
+.recovery-shortcut strong{color:#1a2d49;font-size:14px}
+.recovery-shortcut small{font-size:12px;line-height:1.5;color:#75859c}
+.recovery-button{border-radius:10px!important;background:#eff5ff!important;color:#1b5fd0!important;border:1px solid #cfdef5!important;box-shadow:none!important;font-size:12px!important;padding:12px 15px!important}
+.recovery-button:hover{background:#dfedff!important;border-color:#a9c8fc!important;box-shadow:0 5px 12px #216aff12!important}
+.payment-selection{padding:31px;border:1px solid #dae5f3;border-radius:27px;background:#fff;box-shadow:0 28px 70px rgba(25,54,92,.12),0 4px 15px rgba(25,54,92,.04)}
+.payment-selection h3{font-size:20px;color:#152a49;line-height:1.3;letter-spacing:-.55px;font-weight:850;margin:1px 0 23px}
+.payment-cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.payment-card{position:relative;min-height:218px;padding:22px 13px 19px;border:1.5px solid #e0e7f2;background:linear-gradient(180deg,#fbfcff,#f8fafe);border-radius:18px;gap:8px;align-items:center;justify-content:center;text-align:center;box-shadow:0 1px 3px #1a35600a;will-change:auto}
+.payment-card.selected{background:linear-gradient(145deg,#eef5ff,#f8fbff);border-color:#5291ff;box-shadow:0 0 0 3px #216aff12,0 8px 24px #216aff10}
+.payment-card:not(.unavailable):hover,.payment-card:not(.unavailable):focus-visible{transform:translateY(-5px);border-color:#377fff;background:#f1f7ff;box-shadow:0 14px 30px #2466de1f,0 0 0 3px #216aff10}
+.payment-card .payment-icon{display:grid;place-items:center;width:58px;height:58px;border-radius:18px;background:#eaf2ff;color:#1e65e4;margin-bottom:4px}
+.payment-card .payment-icon-pix{background:#e5f9f4}
+.payment-card .payment-icon-card{color:#1e65e4}
+.payment-card .payment-icon svg{width:35px;height:35px}
+.payment-card strong{color:#192d49;font-size:18px;line-height:1.25;font-weight:860}
+.payment-card small{color:#718096;font-size:11.5px;line-height:1.6;max-width:200px}
+.payment-card b{font-size:21px;font-weight:900;color:#112a4b;letter-spacing:-.4px;margin-top:2px}
+.payment-card.unavailable{cursor:not-allowed;box-shadow:none!important;opacity:.55}
+.payment-card.unavailable:hover{transform:none}
+.payment-info{position:static;z-index:5;color:#6c82a6}
+.payment-info:focus-visible{outline:2px solid #2277ed}
+.payment-brands-tooltip{z-index:80;right:0;left:auto;top:calc(100% + 14px);width:min(280px,calc(100vw - 44px));border-color:#ccddf4;background:#fff;box-shadow:0 18px 45px #1138622c}
+.payment-security{margin:20px 0 2px;font-size:12px;font-weight:650;color:#69809d;text-align:center}
+/* Passos numerados como guia de onboarding de produto */
+.installation-section{background:#fff;border:0;padding:96px 0 106px}
+.installation-section .heading{margin-bottom:37px;max-width:880px}
+.installation-section .heading .tag{display:inline-flex;border-radius:999px;padding:8px 13px;background:#eaf2ff;border-color:#cadfff;color:#2266d5;font-weight:880;font-size:10px;letter-spacing:1.1px}
+.installation-section .heading h2{font-size:clamp(34px,3.65vw,49px);font-weight:860;line-height:1.19;letter-spacing:-1.7px;color:#112640;margin-top:14px;margin-bottom:12px}
+.installation-section .heading p{font-size:15px;line-height:1.8;color:#687a92}
+.install-steps{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:17px;row-gap:17px;max-width:none;list-style:none;padding:0;margin:0}
+.install-step{display:flex;gap:16px;align-items:flex-start;padding:23px 23px;min-height:105px;border:1px solid #e2e8f2;border-radius:18px;background:#fafcff;box-shadow:0 5px 15px #18375a08;font-size:14px;line-height:1.72;color:#43536c;transition:transform .22s ease,box-shadow .22s ease,border-color .22s ease}
+.install-step:hover{transform:translateY(-2px);border-color:#cfdef5;box-shadow:0 11px 28px #153c7714}
+.install-number{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;background:linear-gradient(135deg,#1c75f8,#3464e3);border:0;border-radius:12px;color:#fff;font-size:14px;font-weight:850;box-shadow:0 5px 12px #2663d733}
+.install-step-content,.install-step-content strong{color:#3b4d68}
+.install-step-content strong{color:#1a2e4c}
+.install-step-content code,.install-step .path code{background:#edf3fb;border:1px solid #dbe5f1;border-radius:8px;color:#243a57;font-size:12px;padding:6px 9px}
+.install-step .path{gap:9px;margin-top:9px}
+.install-step .smallbutton{background:#e5f0ff;border:1px solid #bad3f8;color:#1b5fc8;font-size:12px;font-weight:800}
+.install-help{margin-top:22px;padding:30px 34px;border:1px solid #dfeaf7;border-radius:20px;background:linear-gradient(110deg,#edf5ff,#f8fbff 82%);box-shadow:none;color:#576a86}
+.install-help h3{color:#173253;font-size:20px;letter-spacing:-.5px;margin:0 0 13px}
+.install-help p{color:#647893;line-height:1.8;font-size:14px}
+.install-help .btn{border-radius:10px;margin-top:16px;background:#1b6cea}
+.install-note{color:#788aa0!important}
+.foot{background:#091e3b;border-top:0;color:#a9bfd8;padding:29px 0 36px;font-size:12px}
+.foot-inner{gap:8px 18px;line-height:1.8}
+.foot a{color:#85caff;text-decoration:underline;text-decoration-color:#6aa9ff55;text-underline-offset:3px}
+/* Nao altera nenhuma classe dentro dos modais; preserva Pix, Stripe e recuperacao */
+@media(max-width:1100px){
+ .nav{gap:15px}.links{gap:18px}
+ .hero-inner{column-gap:28px;padding-top:70px}
+ .hero h1{font-size:clamp(39px,4.55vw,58px)}
+ .purchase-layout{gap:32px}
+ .payment-selection{padding:25px}
+ .payment-card{min-height:200px}
+ .recovery-shortcut{flex-wrap:wrap}.recovery-button{margin-left:0}
+}
+@media(max-width:800px){
+ html{scroll-padding-top:110px}
+ .hero-inner{grid-template-columns:1fr;gap:25px;min-height:0;padding:58px 0 28px}
+ .hero-copy{max-width:720px;padding-bottom:0}
+ .hero h1{max-width:680px}
+ .hero-art{width:min(100%,680px);margin:auto;max-height:410px;min-height:300px;aspect-ratio:1.55}
+ .hero-benefits{grid-column:1;gap:0;margin-top:10px}
+ .purchase-section{padding:75px 0 82px}
+ .purchase-layout{grid-template-columns:1fr;gap:32px}
+ .purchase-copy{max-width:none}
+ .recovery-shortcut{max-width:680px;flex-wrap:nowrap}
+ .recovery-button{margin-left:auto}
+ .payment-selection{max-width:680px;width:100%;justify-self:center}
+}
+@media(max-width:650px){
+ .container{width:calc(100% - 32px)}
+ .nav{min-height:70px;gap:8px;flex-wrap:wrap;padding:10px 0}
+ .logo{font-size:18px;gap:7px;letter-spacing:-.65px}
+ .logo:before{width:26px;height:26px;flex-basis:26px;border-radius:8px}
+ .links{order:3;width:100%;justify-content:space-between;gap:8px;margin-left:0}
+ .links a:not(.btn){display:inline;font-size:12px;white-space:nowrap}
+ .top .nav-trial{font-size:12px;padding:9px 12px}
+ .gg-language{margin-left:auto}.gg-language label{display:none}
+ .gg-language select{max-width:116px;padding:6px;font-size:12px}
+ .hero-inner{padding-top:44px;row-gap:22px}
+ .hero .tag{font-size:9px;letter-spacing:.75px;padding:7px 10px;max-width:100%;line-height:1.6}
+ .hero h1{font-size:clamp(36px,8vw,52px);line-height:1.1;letter-spacing:-1.8px;margin:19px 0 15px}
+ .hero .intro{font-size:15px;line-height:1.75}
+ .hero .actions{margin:22px 0 14px;display:flex;gap:10px}
+ .hero .actions .btn{width:100%;padding:15px}
+ .hero-more{width:100%;justify-content:center;padding:12px}
+ .hero-art{min-height:240px;aspect-ratio:1.28;padding:12px;border-radius:22px}
+ .hero-art:after{inset:10px;border-radius:16px}
+ .hero-main-device{max-height:290px}
+ .hero-benefits{grid-template-columns:1fr;gap:10px;padding:17px 0 5px}
+ .hero-benefits>div{padding:0;border:0;font-size:12px;gap:10px}
+ .benefit-symbol{width:29px;height:29px;flex-basis:29px;border-radius:8px;font-size:17px}
+ .purchase-section{padding:64px 0 73px}
+ .purchase-copy h2{font-size:clamp(37px,10vw,47px);letter-spacing:-1.3px}
+ .purchase-copy>p{font-size:14px}
+ .purchase-price{gap:8px 10px;margin:18px 0 25px}
+ .purchase-price .price-choice{font-size:clamp(26px,7vw,33px)!important}
+ .recovery-shortcut{flex-wrap:wrap;padding:16px}
+ .recovery-button{width:100%;margin-left:0}
+ .payment-selection{padding:20px;border-radius:21px}
+ .payment-selection h3{font-size:18px;margin-bottom:18px}
+ .payment-cards{gap:11px}
+ .payment-card{min-height:181px;padding:13px 10px;border-radius:15px}
+ .payment-card .payment-icon{height:48px;width:48px;border-radius:14px}
+ .payment-card .payment-icon svg{width:30px;height:30px}
+ .payment-card strong{font-size:17px}.payment-card small{font-size:11px}.payment-card b{font-size:19px}
+ .installation-section{padding:70px 0 78px}
+ .installation-section .heading h2{font-size:clamp(31px,8.5vw,43px);letter-spacing:-1.2px}
+ .install-steps{grid-template-columns:1fr;gap:11px}
+ .install-step{min-height:0;padding:18px 17px;border-radius:15px;font-size:14px}
+ .install-number{width:34px;height:34px;flex-basis:34px}
+ .install-help{padding:22px 19px;border-radius:17px}
+}
+@media(max-width:390px){
+ .container{width:calc(100% - 28px)}
+ .links a:not(.btn){font-size:11px}
+ .top .nav-trial{font-size:11px;padding:8px 9px}
+ .payment-cards{grid-template-columns:1fr}
+ .payment-card{min-height:142px}
+ .purchase-price>b{display:none}
+ .hero h1{font-size:36px}
+}
+@media(prefers-reduced-motion:reduce){
+ .hero-art:hover .hero-main-device,.payment-card:not(.unavailable):hover,.install-step:hover{transform:none}
+ .hero-main-device,.install-step{transition:none}
+}
+
+</style>
+</body></html>
