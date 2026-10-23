@@ -7,7 +7,7 @@ const storeKey='gabilangames_pix_pedido_v2';
 const LEGACY_KEY='gabilangames_pix_pedido_v1';
 const KEEP_MS=30*60*1000;
 const SUCCESS_MS=10*60*1000;
-const PIX_RECIPIENT_NOTICE_MS=7000;
+const PIX_RECIPIENT_NOTICE_MS=11000;
 // Guarda apenas a referencia ao pedido para conciliar pagamentos tardios.
 // QR Code so pode ser retomado durante os primeiros 30 minutos.
 const RECORD_MS=70*60*1000;
