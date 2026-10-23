@@ -7,6 +7,7 @@ const storeKey='gabilangames_pix_pedido_v2';
 const LEGACY_KEY='gabilangames_pix_pedido_v1';
 const KEEP_MS=30*60*1000;
 const SUCCESS_MS=10*60*1000;
+const PIX_RECIPIENT_NOTICE_MS=7000;
 // Guarda apenas a referencia ao pedido para conciliar pagamentos tardios.
 // QR Code so pode ser retomado durante os primeiros 30 minutos.
 const RECORD_MS=70*60*1000;
@@ -39,7 +40,37 @@ function stopClock(){if(clockTimer){clearInterval(clockTimer);clockTimer=null;}}
 function tickClock(){const left=remain();$('pix-countdown').textContent=clockText(left);if(left<=0){stopClock();stopPoll();$('pix-details').hidden=true;$('pix-timer-box').hidden=false;$('pix-cancel').hidden=false;$('pix-check').hidden=true;status('O prazo de 30 minutos para retomar este Pix terminou. Gere outro pedido.','Prazo encerrado');$('pix-new-purchase').textContent='Gerar outro Pix';}}
 function startClock(){stopClock();if(!order||!Number.isFinite(order.startedAt))return;$('pix-timer-box').hidden=false;tickClock();if(remain()>0)clockTimer=setInterval(tickClock,1000);}
 function identity(){return {id:order.id,acesso:order.acesso}}
-function showOrder(){if(!order)return;hideSuccess();$('pix-modal-title').textContent='Pague com Pix';$('pix-modal-intro').textContent='Escaneie o QR Code ou copie o código Pix para pagar R$ 9,99.';$('pix-start').hidden=true;$('pix-order').hidden=false;$('pix-details').hidden=true;$('pix-check').hidden=false;$('pix-cancel').hidden=false;$('pix-new-purchase').textContent='Trocar e-mail';$('pix-timer-box').hidden=true;$('pix-qr-loading').hidden=false;$('pix-check').hidden=true;}
+// A transição começa assim que o e-mail é validado, antes da criação do pedido.
+// O QR Code e o Copia e Cola só são revelados depois dos sete segundos completos.
+function showOrder(){
+  hideSuccess();
+  $('pix-modal-title').textContent='Antes de pagar com Pix';
+  $('pix-modal-intro').textContent='Confira o nome que aparecerá como recebedor no seu banco.';
+  $('pix-start').hidden=true;
+  $('pix-order').hidden=false;
+  $('pix-details').hidden=true;
+  $('pix-timer-box').hidden=true;
+  $('pix-qr-loading').hidden=false;
+  $('pix-order-actions').hidden=true;
+  $('pix-environment-warning').hidden=true;
+  $('pix-stage').hidden=true;
+  $('pix-status').hidden=true;
+  $('pix-new-purchase').textContent='Trocar e-mail';
+  $('pix-modal').querySelector('.pix-modal-dialog').scrollTop=0;
+  return Date.now();
+}
+async function finishOrderTransition(startedAt){
+  const remaining=Math.max(0,PIX_RECIPIENT_NOTICE_MS-(Date.now()-startedAt));
+  if(remaining)await new Promise(resolve=>setTimeout(resolve,remaining));
+  $('pix-modal-title').textContent='Pague com Pix';
+  $('pix-modal-intro').textContent='Escaneie o QR Code ou copie o código Pix para pagar R$ 9,99.';
+  $('pix-qr-loading').hidden=true;
+  $('pix-order-actions').hidden=false;
+  $('pix-environment-warning').hidden=false;
+  $('pix-check').hidden=false;
+  $('pix-cancel').hidden=false;
+  $('pix-modal').querySelector('.pix-modal-dialog').scrollTop=0;
+}
 function hideSuccess(){
   if(successTimer){clearTimeout(successTimer);successTimer=null;}
   successDeadline=0;
@@ -81,7 +112,7 @@ function showSuccess(license,paidAt){
 }
 function updateResume(){const canResume=savedOrder&&remainFor(savedOrder)>0;$('pix-resume').hidden=!canResume;$('pix-resume').textContent=canResume?'Continuar Pix anterior ('+clockText(remainFor(savedOrder))+')':'Continuar Pix anterior';}
 function remainFor(o){return o&&Number.isFinite(o.startedAt)?Math.max(0,KEEP_MS-(Date.now()-o.startedAt)):0;}
-function newPurchase(){if(busy)return;stopPoll();stopClock();hideSuccess();order=null;$('pix-modal-title').textContent='Comprar licença via Pix';$('pix-modal-intro').textContent='Informe o e-mail que receberá sua licença.';$('pix-order').hidden=true;$('pix-start').hidden=false;$('pix-details').hidden=true;$('pix-code').value='';$('pix-image').removeAttribute('src');$('pix-timer-box').hidden=true;$('pix-qr-loading').hidden=true;$('pix-stage').hidden=true;$('pix-status').hidden=true;status('Informe o e-mail para continuar.','Pronto para começar');updateResume();$('pix-buyer-email').focus();}
+function newPurchase(){if(busy)return;stopPoll();stopClock();hideSuccess();order=null;$('pix-modal-title').textContent='Comprar licença via Pix';$('pix-modal-intro').textContent='Informe o e-mail que receberá sua licença.';$('pix-order').hidden=true;$('pix-start').hidden=false;$('pix-details').hidden=true;$('pix-code').value='';$('pix-image').removeAttribute('src');$('pix-timer-box').hidden=true;$('pix-qr-loading').hidden=true;$('pix-order-actions').hidden=false;$('pix-environment-warning').hidden=false;$('pix-stage').hidden=true;$('pix-status').hidden=true;status('Informe o e-mail para continuar.','Pronto para começar');updateResume();$('pix-buyer-email').focus();}
 function cancelPayment(){if(busy)return; // Apenas volta ao formulário: a cobrança na Efí não é cancelada.
   newPurchase();
   status('Digite outro e-mail para criar um novo Pix. Se informar o mesmo e-mail, retomaremos a cobrança anterior.','Alterar e-mail');
@@ -91,7 +122,7 @@ async function resumeSaved(){
   if(!validSaved(savedOrder)){clearSaved();newPurchase();return;}
   order=savedOrder;$('pix-buyer-email').value=order.email;
   // Somente o servidor e a Efi podem confirmar pagamento; nunca gravar a chave localmente.
-  showOrder();setBusy(true);
+  const transitionStartedAt=showOrder();setBusy(true);
   try{
     let done=await consult();
     if(!done){
@@ -99,18 +130,22 @@ async function resumeSaved(){
       const r=await api('/pedido/pagamento',identity());
       if(r.confirmado||r.licencaLiberada)done=await consult();
     }
-    if(done)return;
+    if(done){
+      // Pagamento já confirmado: mostra diretamente a licença, sem QR Code.
+      if($('pix-success-screen').hidden)await finishOrderTransition(transitionStartedAt);
+      return;
+    }
     if(remain()<=0){
-      stopClock();stopPoll();clearSaved();order=null;newPurchase();
+      stopClock();stopPoll();clearSaved();order=null;setBusy(false);newPurchase();
       status('Os 30 minutos para retomar o Pix terminaram. Se pagou, recupere sua licença pelo e-mail.','Prazo encerrado');
       return;
     }
-    try{const q=await api('/pedido/qrcode',identity());showQr(q)}
-    catch{$('pix-qr-loading').hidden=true;$('pix-check').hidden=false;status('Não foi possível recuperar o QR Code. Tente verificar o pagamento.','Consulta indisponível')}
+    try{const q=await api('/pedido/qrcode',identity());await finishOrderTransition(transitionStartedAt);showQr(q)}
+    catch{await finishOrderTransition(transitionStartedAt);status('Não foi possível recuperar o QR Code. Tente verificar o pagamento.','Consulta indisponível')}
     schedulePoll();
   }catch(e){
-    if(remain()<=0){clearSaved();order=null;newPurchase();status('Não foi possível confirmar o pedido antigo. Se pagou, utilize Recuperar licença.','Consulta indisponível');}
-    else status('Não foi possível retomar o pedido: '+e.message,'Falha');
+    if(remain()<=0){clearSaved();order=null;setBusy(false);newPurchase();status('Não foi possível confirmar o pedido antigo. Se pagou, utilize Recuperar licença.','Consulta indisponível');}
+    else{await finishOrderTransition(transitionStartedAt);status('Não foi possível retomar o pedido: '+e.message,'Falha');}
   }finally{setBusy(false)}
 }
 async function copy(text,button){try{await navigator.clipboard.writeText(text);let prev=button.textContent;button.textContent='Copiado!';setTimeout(()=>button.textContent=prev,1700)}catch{status('Não foi possível copiar automaticamente. Copie manualmente.')}}
@@ -118,11 +153,23 @@ function showQr(p){const pix=p.pix||{},v=p.cobranca||{};const qr=$('pix-image');
 async function consult(){const r=await api('/pedido/consultar',identity());const p=r.pedido||{};if(p.licencaLiberada===true && typeof p.licenca==='string' && p.licenca){showSuccess(p.licenca,p.pagoEm);return true}if(p.status==='PAID_TEST'){stopPoll();status('Pagamento de homologação confirmado. Nenhuma licença comercial será emitida.','Teste concluído');return true}if(p.status==='PAID'){status('Pagamento registrado. Aguardando disponibilização da licença.','Pagamento confirmado')}return false}
 function stopPoll(){if(pollTimer){clearInterval(pollTimer);pollTimer=null}}
 function schedulePoll(){stopPoll();let count=0;pollTimer=setInterval(async()=>{if(!order||busy||remain()<=0)return;if(++count>75){stopPoll();return}try{const done=await consult();if(!done){await api('/pedido/pagamento',identity());await consult()}}catch{}},8000)}
-async function begin(){if(busy)return;setBusy(true);status('Preparando Pix...','Aguarde');try{const email=normalizeEmail($('pix-buyer-email').value);if(!/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email)||email.length>254)throw new Error('Informe um e-mail válido.');
+async function begin(){if(busy)return;setBusy(true);status('Preparando Pix...','Aguarde');let transitionStartedAt=0;try{const email=normalizeEmail($('pix-buyer-email').value);if(!/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email)||email.length>254)throw new Error('Informe um e-mail válido.');
 if(savedOrder&&validSaved(savedOrder)&&remainFor(savedOrder)>0&&normalizeEmail(savedOrder.email)===email){setBusy(false);await resumeSaved();return;}
+// A nota aparece imediatamente após o e-mail válido. A criação e a geração do Pix
+// continuam normalmente enquanto a animação é exibida.
+transitionStartedAt=showOrder();
 // Mudou o e-mail: pedido anterior não é cancelado na Efí; removemos apenas sua referência local.
 // A referência anterior só será substituída quando o novo pedido for criado com sucesso.
-const r=await api('/pedido/criar',{email});if(typeof r.pedidoId!=='string'||typeof r.acesso!=='string')throw new Error('Pedido incompleto.');save({id:r.pedidoId,acesso:r.acesso,email,startedAt:Date.now()});showOrder();status('Gerando seu QR Code...','Preparando Pix');try{await api('/pedido/criar-cobranca',identity());const q=await api('/pedido/qrcode',identity());showQr(q)}catch(e){$('pix-qr-loading').hidden=true;$('pix-check').hidden=false;status('Não foi possível carregar o QR Code: '+e.message+'. Tente retomar o pedido.','Pedido criado')}schedulePoll()}catch(e){status('Não foi possível iniciar: '+e.message,'Falha')}finally{setBusy(false)}}
+const r=await api('/pedido/criar',{email});if(typeof r.pedidoId!=='string'||typeof r.acesso!=='string')throw new Error('Pedido incompleto.');save({id:r.pedidoId,acesso:r.acesso,email,startedAt:Date.now()});status('Gerando seu QR Code...','Preparando Pix');try{await api('/pedido/criar-cobranca',identity());const q=await api('/pedido/qrcode',identity());await finishOrderTransition(transitionStartedAt);showQr(q)}catch(e){await finishOrderTransition(transitionStartedAt);status('Não foi possível carregar o QR Code: '+e.message+'. Tente retomar o pedido.','Pedido criado')}schedulePoll()}catch(e){
+  if(transitionStartedAt&&!order){
+    // A criação falhou: devolve o formulário, sem mostrar opções de pagamento inválidas.
+    $('pix-order').hidden=true;$('pix-start').hidden=false;$('pix-qr-loading').hidden=true;
+    $('pix-environment-warning').hidden=false;
+    $('pix-modal-title').textContent='Comprar licença via Pix';
+    $('pix-modal-intro').textContent='Informe o e-mail que receberá sua licença.';
+  }
+  status('Não foi possível iniciar: '+e.message,'Falha');
+}finally{setBusy(false)}}
 async function check(){if(busy||!order)return;setBusy(true);try{const done=await consult();if(!done){const p=await api('/pedido/pagamento',identity());if(p.licencaLiberada===true){await consult()}else if(p.pagamento?.simulacao===true&&p.pagamento.confirmadoHomologacao===true){status('A Efí confirmou uma simulação. A licença comercial não é liberada em homologação.','Homologação')}else if(p.pagamento?.statusEfi==='CONCLUIDA'){status('Pagamento detectado. Aguardando confirmação no pedido.','Verificando')}else{status('Pagamento ainda não confirmado.','Aguardando pagamento')}}}catch(e){status('Falha ao consultar: '+e.message,'Verificação')}finally{setBusy(false)}}
 start.addEventListener('click',begin);$('pix-new-purchase').addEventListener('click',newPurchase);$('pix-cancel').addEventListener('click',cancelPayment);$('pix-resume').addEventListener('click',resumeSaved);$('pix-check').addEventListener('click',check);
 
