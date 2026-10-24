@@ -5,7 +5,7 @@ const $=id=>document.getElementById(id);
 const modal=$('paypal-modal'),msg=$('paypal-message'),entry=$('paypal-entry'),pay=$('paypal-pay'),success=$('paypal-success');
 if(!modal||!msg)return;
 const storeKey='gg_paypal_checkout_v1';
-let stored=null,config=null,chosenCurrency=null,chosenLocale=null,email='',busy=false,loading=false;
+let stored=null,config=null,chosenCurrency=null,chosenLocale=null,email='',busy=false,loading=false,recoveryTimer=null,recoveryBusy=false;
 const sdkPromises=new Map();
 const langs={pt:'pt-BR',en:'en-US',es:'es-ES',ar:'en-US',de:'de-DE',fr:'fr-FR',it:'it-IT',pl:'pl-PL',ru:'ru-RU',ja:'ja-JP',ko:'ko-KR','zh-CN':'zh-CN','zh-TW':'zh-TW'};
 function lang(){return window.GabilanLanguage?.get?.()||$('gg-language')?.value||'pt'}
@@ -16,23 +16,45 @@ price();window.addEventListener('gabilan-language-change',price);
 function message(pt,en){msg.textContent=lang()==='pt'?pt:(en||pt)}
 function view(which){entry.hidden=which!=='entry';pay.hidden=which!=='pay';success.hidden=which!=='success'}
 function load(){try{const value=JSON.parse(localStorage.getItem(storeKey));if(value&&value.id&&value.access&&value.created>Date.now()-24*3600*1000){stored=value;return}}catch{}stored=null;try{localStorage.removeItem(storeKey)}catch{}}
-function save(value){stored=value;try{localStorage.setItem(storeKey,JSON.stringify(value))}catch{}}
-function clear(){stored=null;try{localStorage.removeItem(storeKey)}catch{}}
+function save(value){stored=value;try{localStorage.setItem(storeKey,JSON.stringify(value))}catch{};startRecovery()}
+function stopRecovery(){if(recoveryTimer){clearInterval(recoveryTimer);recoveryTimer=null}}
+function startRecovery(){
+ if(recoveryTimer||!stored||modal.hidden)return;
+ recoveryTimer=setInterval(()=>{
+  if(modal.hidden||!stored||Date.now()-stored.created>5*60*1000){stopRecovery();return}
+  checkStatus().catch(()=>{});
+ },8000);
+}
+function clear(){stopRecovery();stored=null;try{localStorage.removeItem(storeKey)}catch{}}
 async function api(path,data){
  const ctrl=new AbortController(),timer=setTimeout(()=>ctrl.abort(),20000);
  try{const r=await fetch(API+path,{method:data===undefined?'GET':'POST',headers:data===undefined?{}:{'Content-Type':'application/json'},body:data===undefined?undefined:JSON.stringify(data),signal:ctrl.signal});const info=await r.json();if(!r.ok||info.success!==true)throw Error(info.erro||'Falha na comunicacao');return info}
  finally{clearTimeout(timer)}
 }
 function openModal(){modal.hidden=false;modal.setAttribute('aria-hidden','false');document.body.classList.add('pix-modal-open');$('paypal-modal-close').focus()}
-function closeModal(){modal.hidden=true;modal.setAttribute('aria-hidden','true');document.body.classList.remove('pix-modal-open')}
+function closeModal(){stopRecovery();modal.hidden=true;modal.setAttribute('aria-hidden','true');document.body.classList.remove('pix-modal-open')}
 async function checkStatus(){
- if(!stored)return false;
- const d=await api('/paypal/status',{id:stored.id,access:stored.access});
- if(d.status==='PAID'&&d.license){showSuccess(d);return true}
- return false;
+ if(!stored||recoveryBusy)return false;
+ recoveryBusy=true;
+ const pedido=stored;
+ try{
+  const params={id:pedido.id,access:pedido.access};
+  const d=await api('/paypal/status',params);
+  if(!stored||stored.id!==pedido.id)return false;
+  if(d.status==='PAID'&&d.license){showSuccess(d);return true}
+  // O SDK pode fechar o popup sem invocar onApprove, apesar de o comprador
+  // ja ter aprovado. O Worker autentica a aprovacao antes de capturar.
+  if(d.paypalStatus==='APPROVED'){
+   message('Compra aprovada. Finalizando o pagamento...','Order approved. Finalizing payment...');
+   const paid=await api('/paypal/capture',params);
+   if(!stored||stored.id!==pedido.id)return false;
+   if(paid.status==='PAID'&&paid.license){showSuccess(paid);return true}
+  }
+  return false;
+ }finally{recoveryBusy=false}
 }
 function showSuccess(result){
- view('success');
+ stopRecovery();view('success');
  const sandbox=!!result.sandbox;
  $('paypal-success').querySelector('.pix-success-subtitle').textContent=sandbox?'TESTE SANDBOX: nenhum dinheiro real foi cobrado e nenhuma licença comercial foi criada.':(lang()==='pt'?'Pagamento PayPal confirmado. Sua licença está disponível.':'PayPal payment confirmed. Your license is ready.');$('paypal-result-license').textContent=result.license;
  $('paypal-result-email').textContent=result.email||stored?.email||email;
@@ -67,23 +89,28 @@ async function render(){
    createOrder:async()=>{
     if(busy)throw Error('Pagamento em andamento');busy=true;
     try{
+     // Nao sobrescrever um pedido ainda nao conciliado apenas por clicar novamente.
+     // O comprador pode escolher explicitamente Nova compra se necessario.
+     if(stored){
+      if(await checkStatus())throw Error('Pagamento confirmado');
+      throw Error('Ja existe um pedido pendente. Use Verificar pagamento antes de iniciar outro.');
+     }
      message('Criando pedido seguro...','Creating secure order...');
      const v=await api('/paypal/create',{email,currency:chosenCurrency,locale:lang()});
      save({id:v.id,access:v.access,paypalOrderId:v.paypalOrderId,email,created:Date.now(),currency:chosenCurrency});
      busy=false;return v.paypalOrderId;
-    }catch(e){busy=false;message('Não foi possível iniciar: '+e.message,'Could not start payment: '+e.message);throw e}
+    }catch(e){busy=false;if(success.hidden)message('Não foi possível iniciar: '+e.message,'Could not start payment: '+e.message);throw e}
    },
    onApprove:async data=>{
-    if(!stored||data.orderID!==stored.paypalOrderId){message('Pedido inválido. Verifique seu pagamento.','Order mismatch. Check payment status.');return}
+    if(!stored||data.orderID!==stored.paypalOrderId){message('Pedido divergente. Use Verificar pagamento.','Order mismatch. Check payment status.');return}
     message('Confirmando pagamento com o PayPal...','Confirming payment with PayPal...');
     try{
-     const captured=await api('/paypal/capture',{id:stored.id,access:stored.access});
-     if(captured.status==='PAID'&&captured.license){showSuccess(captured);return}
      if(await checkStatus())return;
-     message('Aguardando a confirmação do PayPal. Use Verificar pagamento.','Awaiting PayPal confirmation. Use Check payment.');
+     startRecovery();
+     message('Aprovação recebida. Estamos confirmando. Use Verificar pagamento se necessário.','Approval received. Confirming payment. Use Check payment if needed.');
     }catch(e){
-     try{if(await checkStatus())return}catch{}
-     message('Ainda não foi possível confirmar. Use Verificar pagamento.','Unable to confirm yet. Use Check payment.');
+     startRecovery();
+     message('Aprovação recebida; confirmação pendente. Use Verificar pagamento.','Approval received; confirmation pending. Use Check payment.');
     }
    },
    onCancel:()=>message('Pagamento cancelado. Nenhuma licença foi emitida.','Payment cancelled. No license issued.'),
@@ -94,7 +121,23 @@ async function render(){
  }catch(e){message('Falha ao preparar o PayPal: '+e.message,'Failed to prepare PayPal: '+e.message);view('entry')}
  finally{loading=false}
 }
-async function open(){openModal();view('entry');message('Informe o e-mail para receber sua licença.','Enter your email to receive your license.');load();if(stored){$('paypal-email').value=stored.email||'';try{if(await checkStatus())return}catch{message('Pedido anterior não pôde ser consultado.','Could not check previous order.')} }
+async function open(){
+ openModal();view('entry');message('Informe o e-mail para receber sua licença.','Enter your email to receive your license.');load();
+ if(stored){
+  $('paypal-email').value=stored.email||'';
+  try{
+   if(await checkStatus())return;
+   message('Pedido anterior encontrado. Use Verificar pagamento antes de iniciar outra compra.','Previous order found. Check payment before starting a new purchase.');
+  }catch{message('Nao foi possivel consultar o pedido anterior. Tente Verificar pagamento.','Unable to check previous order. Please use Check payment.')}
+  startRecovery();
+  // Apresenta os controles Verificar pagamento / Nova compra para o pedido
+  // preservado, sem criar um novo pedido PayPal automaticamente.
+  email=stored.email||'';
+  chosenCurrency=stored.currency||currency();
+  chosenLocale=langs[lang()]||'en-US';
+  try{config=await api('/paypal/config');await render()}
+  catch{view('pay');$('paypal-buttons').replaceChildren();message('Pedido anterior: use Verificar pagamento.','Previous order: use Check payment.')}
+ }
 }
 $('paypal-form').addEventListener('submit',async e=>{
  e.preventDefault();if(busy||loading)return;
@@ -108,7 +151,10 @@ $('paypal-form').addEventListener('submit',async e=>{
  finally{busy=false;$('paypal-submit').disabled=false}
 });
 $('paypal-verify').addEventListener('click',async()=>{message('Consultando PayPal...','Checking PayPal...');try{if(!await checkStatus())message('Pagamento ainda não confirmado.','Payment not confirmed yet.')}catch(e){message('Falha na consulta: '+e.message,'Could not check payment: '+e.message)}});
-$('paypal-new').addEventListener('click',()=>{clear();view('entry');message('Nova compra: informe seu e-mail.','New purchase: enter your email.');});
+$('paypal-new').addEventListener('click',()=>{
+ if(stored&&!window.confirm(lang()==='pt'?'O pedido anterior pode ter sido aprovado. Antes de iniciar outra compra, use Verificar pagamento. Deseja mesmo descartar a referencia deste pedido?':'Your previous order may have been approved. Check payment before starting another purchase. Discard the previous order reference?'))return;
+ clear();view('entry');message('Nova compra: informe seu e-mail.','New purchase: enter your email.');
+});
 $('paypal-copy').addEventListener('click',async()=>{try{await navigator.clipboard.writeText($('paypal-result-license').textContent);$('paypal-copy').textContent='Copiado!';setTimeout(()=>$('paypal-copy').textContent='Copiar licença',1400)}catch{message('Selecione e copie a licença.','Select and copy the license.')}});
 $('paypal-modal-close').addEventListener('click',closeModal);modal.querySelector('.pix-modal-backdrop').addEventListener('click',closeModal);
 $('paypal-open')?.addEventListener('click',e=>{e.preventDefault();open()});$('paypal-price-open')?.addEventListener('click',open);
