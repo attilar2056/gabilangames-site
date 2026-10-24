@@ -13,7 +13,7 @@ const sdkPromises=new Map();
 const langs={pt:'pt-BR',en:'en-US',es:'es-ES',ar:'en-US',de:'de-DE',fr:'fr-FR',it:'it-IT',pl:'pl-PL',ru:'ru-RU',ja:'ja-JP',ko:'ko-KR','zh-CN':'zh-CN','zh-TW':'zh-TW'};
 function lang(){return window.GabilanLanguage?.get?.()||$('gg-language')?.value||'pt'}
 function currency(){return lang()==='pt'?'BRL':'USD'}
-function money(c){return c==='BRL'?'R$ 14,99':'US$ 2,99'}
+function money(c){return c==='BRL'?'R$ 1,00':'US$ 2,99'}
 function price(){const value=money(currency());document.querySelectorAll('[data-paypal-price]').forEach(el=>el.textContent=value);}
 price();window.addEventListener('gabilan-language-change',price);
 function message(pt,en){msg.textContent=lang()==='pt'?pt:(en||pt)}
