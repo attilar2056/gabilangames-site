@@ -124,12 +124,9 @@ async function resumeSaved(){
   // Somente o servidor e a Efi podem confirmar pagamento; nunca gravar a chave localmente.
   const transitionStartedAt=showOrder();setBusy(true);
   try{
-    let done=await consult();
-    if(!done){
-      // O pagamento pode ter ocorrido com o site fechado, sem ter sido conciliado ainda.
-      const r=await api('/pedido/pagamento',identity());
-      if(r.confirmado||r.licencaLiberada)done=await consult();
-    }
+    // Primeiro consulta a licença no D1. Somente concilia o pagamento
+    // automaticamente depois de confirmar que existe QR Code/cobrança válida.
+    const done=await consult();
     if(done){
       // Pagamento já confirmado: mostra diretamente a licença, sem QR Code.
       if($('pix-success-screen').hidden)await finishOrderTransition(transitionStartedAt);
@@ -141,7 +138,7 @@ async function resumeSaved(){
       return;
     }
     try{const q=await api('/pedido/qrcode',identity());await finishOrderTransition(transitionStartedAt);showQr(q)}
-    catch{await finishOrderTransition(transitionStartedAt);status('Não foi possível recuperar o QR Code. Tente verificar o pagamento.','Consulta indisponível')}
+    catch{await finishOrderTransition(transitionStartedAt);status('Não foi possível recuperar o QR Code. A cobrança ainda não está disponível. Se já pagou, utilize Recuperar licença.','Consulta indisponível')}
     schedulePoll();
   }catch(e){
     if(remain()<=0){clearSaved();order=null;setBusy(false);newPurchase();status('Não foi possível confirmar o pedido antigo. Se pagou, utilize Recuperar licença.','Consulta indisponível');}
@@ -152,7 +149,7 @@ async function copy(text,button){try{await navigator.clipboard.writeText(text);l
 function showQr(p){const pix=p.pix||{},v=p.cobranca||{};const qr=$('pix-image');const code=$('pix-code');const value=pix.copiaECola||'';if(value){code.value=value;$('pix-copy-row').hidden=false}else{$('pix-copy-row').hidden=true;code.value=''}const img=pix.imagemQrcode||'';if(typeof img==='string' && (/^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(img)||/^data:image\/jpeg;base64,[A-Za-z0-9+/=]+$/.test(img))){qr.src=img;qr.hidden=false}else{qr.hidden=true;qr.removeAttribute('src')} const ready=!!value||!qr.hidden;$('pix-details').hidden=!ready;$('pix-qr-loading').hidden=true;if(ready){startClock();$('pix-check').hidden=false;}else{$('pix-timer-box').hidden=true;$('pix-check').hidden=false;}if(v.statusEfi==='CONCLUIDA')status('Cobrança concluída na Efí. Verifique o status do pedido.','Pagamento localizado');else if(value)status('Aguardando pagamento de R$ 9,99.','Aguardando pagamento');else status(p.mensagem||'QR Code não disponível.','Consulta realizada');}
 async function consult(){const r=await api('/pedido/consultar',identity());const p=r.pedido||{};if(p.licencaLiberada===true && typeof p.licenca==='string' && p.licenca){showSuccess(p.licenca,p.pagoEm);return true}if(p.status==='PAID_TEST'){stopPoll();status('Pagamento de homologação confirmado. Nenhuma licença comercial será emitida.','Teste concluído');return true}if(p.status==='PAID'){status('Pagamento registrado. Aguardando disponibilização da licença.','Pagamento confirmado')}return false}
 function stopPoll(){if(pollTimer){clearInterval(pollTimer);pollTimer=null}}
-function schedulePoll(){stopPoll();let count=0;pollTimer=setInterval(async()=>{if(!order||busy||remain()<=0)return;if(++count>75){stopPoll();return}try{const done=await consult();if(!done){await api('/pedido/pagamento',identity());await consult()}}catch{}},8000)}
+function schedulePoll(){stopPoll();if($('pix-details').hidden)return;let count=0;pollTimer=setInterval(async()=>{if(!order||busy||remain()<=0)return;if(++count>75){stopPoll();return}try{const done=await consult();if(!done){await api('/pedido/pagamento',identity());await consult()}}catch{}},8000)}
 async function begin(){if(busy)return;setBusy(true);status('Preparando Pix...','Aguarde');let transitionStartedAt=0;try{const email=normalizeEmail($('pix-buyer-email').value);if(!/^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(email)||email.length>254)throw new Error('Informe um e-mail válido.');
 if(savedOrder&&validSaved(savedOrder)&&remainFor(savedOrder)>0&&normalizeEmail(savedOrder.email)===email){setBusy(false);await resumeSaved();return;}
 // A nota aparece imediatamente após o e-mail válido. A criação e a geração do Pix
@@ -160,7 +157,7 @@ if(savedOrder&&validSaved(savedOrder)&&remainFor(savedOrder)>0&&normalizeEmail(s
 transitionStartedAt=showOrder();
 // Mudou o e-mail: pedido anterior não é cancelado na Efí; removemos apenas sua referência local.
 // A referência anterior só será substituída quando o novo pedido for criado com sucesso.
-const r=await api('/pedido/criar',{email});if(typeof r.pedidoId!=='string'||typeof r.acesso!=='string')throw new Error('Pedido incompleto.');save({id:r.pedidoId,acesso:r.acesso,email,startedAt:Date.now()});status('Gerando seu QR Code...','Preparando Pix');try{await api('/pedido/criar-cobranca',identity());const q=await api('/pedido/qrcode',identity());await finishOrderTransition(transitionStartedAt);showQr(q)}catch(e){await finishOrderTransition(transitionStartedAt);status('Não foi possível carregar o QR Code: '+e.message+'. Tente retomar o pedido.','Pedido criado')}schedulePoll()}catch(e){
+const r=await api('/pedido/criar',{email});if(typeof r.pedidoId!=='string'||typeof r.acesso!=='string')throw new Error('Pedido incompleto.');save({id:r.pedidoId,acesso:r.acesso,email,startedAt:Date.now()});status('Gerando seu QR Code...','Preparando Pix');try{await api('/pedido/criar-cobranca',identity());const q=await api('/pedido/qrcode',identity());await finishOrderTransition(transitionStartedAt);showQr(q)}catch(e){await finishOrderTransition(transitionStartedAt);status('Não foi possível gerar o QR Code: '+e.message+'. Nenhuma nova tentativa automática será feita.','Cobrança indisponível')}schedulePoll()}catch(e){
   if(transitionStartedAt&&!order){
     // A criação falhou: devolve o formulário, sem mostrar opções de pagamento inválidas.
     $('pix-order').hidden=true;$('pix-start').hidden=false;$('pix-qr-loading').hidden=true;
@@ -170,7 +167,7 @@ const r=await api('/pedido/criar',{email});if(typeof r.pedidoId!=='string'||type
   }
   status('Não foi possível iniciar: '+e.message,'Falha');
 }finally{setBusy(false)}}
-async function check(){if(busy||!order)return;setBusy(true);try{const done=await consult();if(!done){const p=await api('/pedido/pagamento',identity());if(p.licencaLiberada===true){await consult()}else if(p.pagamento?.simulacao===true&&p.pagamento.confirmadoHomologacao===true){status('A Efí confirmou uma simulação. A licença comercial não é liberada em homologação.','Homologação')}else if(p.pagamento?.statusEfi==='CONCLUIDA'){status('Pagamento detectado. Aguardando confirmação no pedido.','Verificando')}else{status('Pagamento ainda não confirmado.','Aguardando pagamento')}}}catch(e){status('Falha ao consultar: '+e.message,'Verificação')}finally{setBusy(false)}}
+async function check(){if(busy||!order)return;setBusy(true);try{const done=await consult();if(!done){if($('pix-details').hidden){status('A cobrança Pix ainda não foi disponibilizada. Não há pagamento a verificar.','Cobrança indisponível');return;}const p=await api('/pedido/pagamento',identity());if(p.licencaLiberada===true){await consult()}else if(p.pagamento?.simulacao===true&&p.pagamento.confirmadoHomologacao===true){status('A Efí confirmou uma simulação. A licença comercial não é liberada em homologação.','Homologação')}else if(p.pagamento?.statusEfi==='CONCLUIDA'){status('Pagamento detectado. Aguardando confirmação no pedido.','Verificando')}else{status('Pagamento ainda não confirmado.','Aguardando pagamento')}}}catch(e){status('Falha ao consultar: '+e.message,'Verificação')}finally{setBusy(false)}}
 start.addEventListener('click',begin);$('pix-new-purchase').addEventListener('click',newPurchase);$('pix-cancel').addEventListener('click',cancelPayment);$('pix-resume').addEventListener('click',resumeSaved);$('pix-check').addEventListener('click',check);
 
 $('pix-copy-btn').addEventListener('click',()=>copy($('pix-code').value,$('pix-copy-btn')));
