@@ -315,6 +315,10 @@ html:not([lang="pt-BR"]) .payment-selection .payment-cards{grid-template-columns
 .paypal-modal .stripe-actions{display:flex;gap:10px;flex-wrap:wrap;margin:15px 0}
 .paypal-modal .paypal-amount{color:#17243a;font-weight:500}
 .paypal-modal #paypal-buttons{min-height:60px;max-width:520px;margin:14px auto}
+/* PayPal: texto legivel no cartao claro de confirmacao por e-mail.
+   Restrito ao PayPal; nao altera Pix nem Stripe. */
+.paypal-modal #paypal-success .pix-success-email strong{color:#17243a!important}
+.paypal-modal #paypal-success #paypal-result-email{color:#174f98!important;font-weight:700}
 .paypal-modal [hidden]{display:none!important}
 @media(max-width:800px){.payment-selection .payment-cards{grid-template-columns:1fr 1fr!important}}
 @media(max-width:650px){.payment-selection .payment-cards,html:not([lang="pt-BR"]) .payment-selection .payment-cards{grid-template-columns:1fr!important}}
@@ -540,7 +544,7 @@ input[type="email"],input[type="text"],code,pre{direction:ltr;unicode-bidi:plain
 <div id="paypal-entry"><form id="paypal-form"><label class="stripe-field" for="paypal-email">E-mail para receber a licença</label><input required type="email" autocomplete="email" maxlength="254" id="paypal-email" placeholder="seuemail@exemplo.com"><p class="stripe-steps">O pagamento é processado pelo PayPal. Não armazenamos seus dados financeiros.</p><button class="btn" type="submit" id="paypal-submit">Continuar para o PayPal</button></form></div>
 <div id="paypal-pay" hidden><p class="paypal-amount">Valor: <strong id="paypal-amount-display">US$ 2,99</strong></p><div id="paypal-buttons"></div><div class="stripe-actions"><button type="button" class="btn" id="paypal-verify">Verificar pagamento</button><button type="button" class="smallbutton" id="paypal-new">Nova compra</button></div></div>
 <div id="paypal-success" hidden class="pix-success-screen"><div class="pix-success-check" aria-hidden="true"><svg viewBox="0 0 80 80"><circle cx="40" cy="40" r="35" class="pix-success-ring"></circle><path d="M23 40l12 12 23-26" class="pix-success-tick"></path></svg></div><h2>Transação concluída</h2><p class="pix-success-subtitle">Pagamento PayPal confirmado. Sua licença está disponível.</p><div class="pix-success-license"><label>Sua licença</label><p>Guarde esta chave para ativar o software.</p><code id="paypal-result-license"></code><button class="btn" type="button" id="paypal-copy">Copiar licença</button></div><div class="pix-success-email"><strong>Licença por e-mail</strong><p>Uma cópia será enviada para <b id="paypal-result-email"></b>. Confira a caixa de entrada e o spam. Se necessário, utilize Recuperar licença.</p></div></div>
-</section></div><script defer src="assets/paypal-checkout.js?v=20261024-paypal-live-brl100-sem-retry-v2"></script><script defer src="assets/stripe-checkout.js?v=20261023-stripe-locale-v1"></script><script defer src="assets/language.js?v=20261024-paypal-messages-v1"></script>
+</section></div><script defer src="assets/paypal-checkout.js?v=20261024-paypal-live-brl1499-email-visivel-v3"></script><script defer src="assets/stripe-checkout.js?v=20261023-stripe-locale-v1"></script><script defer src="assets/language.js?v=20261024-paypal-messages-v1"></script>
 <style id="gg-storefront-layout-2026">
 /*
  * Gabilan Games — novo layout da pagina de vendas (2026-10-23)
