@@ -44,7 +44,7 @@ function sdk(config,c,locale){
  if(sdkPromises.has(ns))return sdkPromises.get(ns);
  const promise=new Promise((resolve,reject)=>{
   const s=document.createElement('script');
-  const params=new URLSearchParams({'client-id':config.clientId,'currency':c,'intent':'capture','components':'buttons','locale':locale});
+  const params=new URLSearchParams({'client-id':config.clientId,'currency':c,'intent':'capture','components':'buttons'});
   s.src='https://www.paypal.com/sdk/js?'+params.toString();s.async=true;s.dataset.namespace=ns;
   s.onload=()=>window[ns]?.Buttons?resolve(window[ns]):reject(Error('SDK PayPal indisponivel'));
   s.onerror=()=>reject(Error('Falha ao carregar o PayPal'));
